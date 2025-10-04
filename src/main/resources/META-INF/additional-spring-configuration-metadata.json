@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "ipoalerts.api.key",
+    "type": "java.lang.String",
+    "description": "x-api-key of ipo alerts website"
+  },
+  {
+    "name": "ipoalerts.url",
+    "type": "java.lang.String",
+    "description": "ipoalerts url"
+  }
+]}

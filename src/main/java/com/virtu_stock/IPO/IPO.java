@@ -34,8 +34,8 @@ public class IPO {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "ipo_alerts_id")
-    private String ipoAlertsID;
+    @Column(name = "ipo_alert_id")
+    private String ipoAlertId;
 
     private String name;
     private String symbol;
@@ -59,8 +59,7 @@ public class IPO {
 
     @Column(name = "minimum_quantity")
     private Integer minQty;
-    @Column(name = "minimum_amount")
-    private BigDecimal minAmount;
+
     private String logo;
     @Column(name = "issue_size")
     private String issueSize;

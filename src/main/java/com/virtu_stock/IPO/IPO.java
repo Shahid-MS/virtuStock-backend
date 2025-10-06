@@ -1,7 +1,13 @@
 package com.virtu_stock.IPO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import com.virtu_stock.GMP.GMP;
+import com.virtu_stock.Subscription.Subscription;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -18,7 +24,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ipo") // Optional: specify table name
+@Table(name = "ipo")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,21 +34,37 @@ public class IPO {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "ipo_alerts_id")
+    private String ipoAlertsID;
+
     private String name;
     private String symbol;
     private String type;
     private String status;
-    private String slug;
+    @Column(name = "info_url")
     private String infoUrl;
+    @Column(name = "nse_info_url")
     private String nseInfoUrl;
-    private String startDate;
-    private String endDate;
-    private String listingDate;
-    private String priceRange;
+    @Column(name = "start_date")
+    private LocalDate startDate;
+    @Column(name = "end_date")
+    private LocalDate endDate;
+    @Column(name = "listing_date")
+    private LocalDate listingDate;
+    @Column(name = "min_price")
+    private Integer minPrice;
+
+    @Column(name = "max_price")
+    private Integer maxPrice;
+
+    @Column(name = "minimum_quantity")
     private Integer minQty;
-    private Integer minAmount;
+    @Column(name = "minimum_amount")
+    private BigDecimal minAmount;
     private String logo;
+    @Column(name = "issue_size")
     private String issueSize;
+    @Column(name = "prospectus_url")
     private String prospectusUrl;
 
     @Column(columnDefinition = "TEXT")
@@ -57,5 +79,13 @@ public class IPO {
     @CollectionTable(name = "ipo_risks", joinColumns = @JoinColumn(name = "ipo_id"))
     @Column(name = "risk")
     private List<String> risks;
+
+    @ElementCollection
+    @CollectionTable(name = "subscription", joinColumns = @JoinColumn(name = "ipo_id"))
+    private List<Subscription> subscriptions;
+
+    @ElementCollection
+    @CollectionTable(name = "gmp", joinColumns = @JoinColumn(name = "ipo_id"))
+    private List<GMP> gmp;
 
 }

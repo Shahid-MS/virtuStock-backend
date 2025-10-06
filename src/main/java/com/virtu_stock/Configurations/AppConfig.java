@@ -1,4 +1,4 @@
-package com.virtu_stock;
+package com.virtu_stock.Configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

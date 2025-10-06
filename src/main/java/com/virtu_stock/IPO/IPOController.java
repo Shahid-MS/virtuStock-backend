@@ -23,10 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api")
 public class IPOController {
 
-    // @GetMapping("/ipo")
-    // public String getIpo() {
-    // return new
-    // }
     @Autowired
     IPOJpaRepository ipoJPARepo;
     @Autowired
@@ -38,15 +34,10 @@ public class IPOController {
         ipo.setSymbol((String) ipoMap.get("symbol"));
         ipo.setType((String) ipoMap.get("type"));
         ipo.setStatus((String) ipoMap.get("status"));
-        ipo.setSlug((String) ipoMap.get("slug"));
+
         ipo.setInfoUrl((String) ipoMap.get("infoUrl"));
         ipo.setNseInfoUrl((String) ipoMap.get("nseInfoUrl"));
-        ipo.setStartDate((String) ipoMap.get("startDate"));
-        ipo.setEndDate((String) ipoMap.get("endDate"));
-        ipo.setListingDate((String) ipoMap.get("listingDate"));
-        ipo.setPriceRange((String) ipoMap.get("priceRange"));
-        ipo.setMinQty((Integer) ipoMap.get("minQty"));
-        ipo.setMinAmount((Integer) ipoMap.get("minAmount"));
+
         ipo.setLogo((String) ipoMap.get("logo"));
         ipo.setIssueSize((String) ipoMap.get("issueSize"));
         ipo.setProspectusUrl((String) ipoMap.get("prospectusUrl"));

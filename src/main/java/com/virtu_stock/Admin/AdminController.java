@@ -46,9 +46,9 @@ public class AdminController {
                 List<Map<String, Object>> ipos = (List<Map<String, Object>>) ipoAlertsRes.get("ipos");
                 for (Map<String, Object> ipoRes : ipos) {
                     String ipoAlertId = (String) ipoRes.get("id");
-                    if (ipoRepo.existsByIpoAlertId(ipoAlertId) || (String) ipoRes.get("type") == "DEBT")
+                    if ("DEBT".equals((String) ipoRes.get("type")) || ipoRepo.existsByIpoAlertId(ipoAlertId)) {
                         continue;
-
+                    }
                     IPO ipo = ipoHelper.mapToIPO(ipoRes);
                     ipoRepo.save(ipo);
                 }

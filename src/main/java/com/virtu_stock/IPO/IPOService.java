@@ -1,5 +1,7 @@
 package com.virtu_stock.IPO;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
 
 @Service
@@ -25,34 +28,60 @@ public class IPOService {
                 .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
     }
 
-    public String updateIpo(UUID id, IPO ipo) {
+    public IPO updateIpo(UUID id, IPO ipo) {
         IPO existingIpo = ipoRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
 
         // Subscription Update
-        List<Subscription> existingSubs = existingIpo.getSubscriptions();
-        if (existingSubs == null) {
-            existingSubs = new ArrayList<>();
-        }
-
         List<Subscription> latestSubs = ipo.getSubscriptions();
+        if (latestSubs != null) {
 
-        for (Subscription subs : latestSubs) {
-            Optional<Subscription> foundSub = existingSubs.stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))
-                    .findFirst();
-            if (foundSub.isPresent()) {
-                foundSub.get().setSubsvalue(subs.getSubsvalue());
-            } else {
-                existingSubs.add(
-                        Subscription.builder()
-                                .name(subs.getName())
-                                .subsvalue(subs.getSubsvalue())
-                                .build());
+            List<Subscription> existingSubs = existingIpo.getSubscriptions();
+            if (existingSubs == null) {
+                existingSubs = new ArrayList<>();
             }
+
+            for (Subscription subs : latestSubs) {
+                Optional<Subscription> foundSub = existingSubs.stream()
+                        .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))
+                        .findFirst();
+                if (foundSub.isPresent()) {
+                    foundSub.get().setSubsvalue(subs.getSubsvalue());
+                } else {
+                    existingSubs.add(
+                            Subscription.builder()
+                                    .name(subs.getName())
+                                    .subsvalue(subs.getSubsvalue())
+                                    .build());
+                }
+            }
+            existingIpo.setSubscriptions(existingSubs);
         }
-        existingIpo.setSubscriptions(existingSubs);
+
+        // Update GMP
+        List<GMP> latestGMP = ipo.getGmp();
+        if (latestGMP != null) {
+
+            List<GMP> existingGMP = existingIpo.getGmp();
+            if (existingGMP == null) {
+                existingGMP = new ArrayList<>();
+            }
+
+            for (GMP g : latestGMP) {
+                Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
+                        .findFirst();
+                if (foundGMP.isPresent()) {
+                    foundGMP.get().setGmp(g.getGmp());
+                    foundGMP.get().setLastUpdated(LocalDateTime.now());
+                } else {
+                    existingGMP.add(GMP.builder().gmp(g.getGmp()).gmpDate(LocalDate.now())
+                            .lastUpdated(LocalDateTime.now()).build());
+                }
+            }
+            existingIpo.setGmp(existingGMP);
+        }
+        
         ipoRepo.save(existingIpo);
-        return "Updated successfully";
+        return existingIpo;
     }
 }

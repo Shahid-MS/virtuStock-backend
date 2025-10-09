@@ -15,8 +15,6 @@ public class IPOHelper {
             return null;
         }
 
-        System.out.println(ipoObj);
-
         @SuppressWarnings("unchecked")
         Map<String, Object> ipoMap = (Map<String, Object>) ipoObj;
 

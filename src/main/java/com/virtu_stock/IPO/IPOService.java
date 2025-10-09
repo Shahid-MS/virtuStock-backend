@@ -61,7 +61,6 @@ public class IPOService {
         // Update GMP
         List<GMP> latestGMP = ipo.getGmp();
         if (latestGMP != null) {
-
             List<GMP> existingGMP = existingIpo.getGmp();
             if (existingGMP == null) {
                 existingGMP = new ArrayList<>();
@@ -70,17 +69,18 @@ public class IPOService {
             for (GMP g : latestGMP) {
                 Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
                         .findFirst();
+                System.out.println(foundGMP);
                 if (foundGMP.isPresent()) {
                     foundGMP.get().setGmp(g.getGmp());
                     foundGMP.get().setLastUpdated(LocalDateTime.now());
                 } else {
-                    existingGMP.add(GMP.builder().gmp(g.getGmp()).gmpDate(LocalDate.now())
+                    existingGMP.add(GMP.builder().gmp(g.getGmp()).gmpDate(g.getGmpDate())
                             .lastUpdated(LocalDateTime.now()).build());
                 }
             }
             existingIpo.setGmp(existingGMP);
         }
-        
+
         ipoRepo.save(existingIpo);
         return existingIpo;
     }

@@ -3,10 +3,15 @@ package com.virtu_stock.Admin;
 import java.util.List;
 import java.util.Map;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.virtu_stock.Helper.IPOHelper;
 import com.virtu_stock.IPO.IPO;
 import com.virtu_stock.IPO.IPORepository;
+import com.virtu_stock.IPO.IPOService;
 import com.virtu_stock.IPOAlerts.IPOAlertsService;
 
 @RestController
@@ -26,7 +32,10 @@ public class AdminController {
     IPOAlertsService ipoAlertsService;
 
     @Autowired
-    IPOHelper ipoHelper;
+    private IPOHelper ipoHelper;
+
+    @Autowired
+    private IPOService ipoService;
 
     @SuppressWarnings("unchecked")
     @GetMapping("/ipo/fetch")
@@ -61,5 +70,18 @@ public class AdminController {
                     .body("Error fetching IPOs: " + e.getMessage());
         }
 
+    }
+
+    @PutMapping("/ipo/{id}")
+    public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody IPO ipo) {
+        try {
+            IPO updatedIpo = ipoService.updateIpo(id, ipo);
+            return ResponseEntity.ok().body(updatedIpo);
+
+        } catch (Exception e) {
+            // e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching IPOs: " + e.getMessage());
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.virtu_stock.IPO;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +34,7 @@ public class IPOService {
         // Subscription Update
         List<Subscription> latestSubs = ipo.getSubscriptions();
         if (latestSubs != null) {
-
             List<Subscription> existingSubs = existingIpo.getSubscriptions();
-            if (existingSubs == null) {
-                existingSubs = new ArrayList<>();
-            }
-
             for (Subscription subs : latestSubs) {
                 Optional<Subscription> foundSub = existingSubs.stream()
                         .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))

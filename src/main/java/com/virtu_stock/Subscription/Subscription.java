@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class Subscription {
     private String name;
     @Column(name = "subscription_value")
-    private String subsvalue;
+    private Integer subsvalue;
 }

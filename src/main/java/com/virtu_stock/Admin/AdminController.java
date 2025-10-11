@@ -74,10 +74,10 @@ public class AdminController {
 
     @PutMapping("/ipo/{id}")
     public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody IPO ipo) {
+        System.out.println(ipo);
         try {
             IPO updatedIpo = ipoService.updateIpo(id, ipo);
             return ResponseEntity.ok().body(updatedIpo);
-
         } catch (Exception e) {
             // e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

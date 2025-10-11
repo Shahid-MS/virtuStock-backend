@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
 
@@ -18,7 +19,7 @@ public class IPOService {
     private IPORepository ipoRepo;
 
     public List<IPO> fetchAllIpos() {
-        List<IPO> ipos = ipoRepo.findAll();
+        List<IPO> ipos = ipoRepo.findAllByOrderByEndDateDesc();
         return ipos;
     }
 
@@ -32,10 +33,10 @@ public class IPOService {
                 .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
 
         // Subscription Update
-        List<Subscription> latestSubs = ipo.getSubscriptions();
-        if (latestSubs != null) {
+        List<Subscription> newSubs = ipo.getSubscriptions();
+        if (newSubs != null) {
             List<Subscription> existingSubs = existingIpo.getSubscriptions();
-            for (Subscription subs : latestSubs) {
+            for (Subscription subs : newSubs) {
                 Optional<Subscription> foundSub = existingSubs.stream()
                         .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))
                         .findFirst();
@@ -53,14 +54,14 @@ public class IPOService {
         }
 
         // Update GMP
-        List<GMP> latestGMP = ipo.getGmp();
-        if (latestGMP != null) {
+        List<GMP> newGMP = ipo.getGmp();
+        if (newGMP != null) {
             List<GMP> existingGMP = existingIpo.getGmp();
             if (existingGMP == null) {
                 existingGMP = new ArrayList<>();
             }
 
-            for (GMP g : latestGMP) {
+            for (GMP g : newGMP) {
                 Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
                         .findFirst();
                 System.out.println(foundGMP);
@@ -73,6 +74,12 @@ public class IPOService {
                 }
             }
             existingIpo.setGmp(existingGMP);
+        }
+
+        // update verdict
+        Verdict newVerdict = ipo.getVerdict();
+        if (newVerdict != null) {
+            existingIpo.setVerdict(newVerdict);
         }
 
         ipoRepo.save(existingIpo);

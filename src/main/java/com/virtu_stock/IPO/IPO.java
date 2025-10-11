@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
 
@@ -13,10 +14,13 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -70,6 +74,9 @@ public class IPO {
     @Column(columnDefinition = "TEXT")
     private String about;
 
+    @Enumerated(EnumType.STRING)
+    private Verdict verdict;
+
     @ElementCollection
     @CollectionTable(name = "ipo_strengths", joinColumns = @JoinColumn(name = "ipo_id"))
     @Column(name = "strength")
@@ -86,20 +93,27 @@ public class IPO {
 
     @ElementCollection
     @CollectionTable(name = "gmp", joinColumns = @JoinColumn(name = "ipo_id"))
+    @OrderBy("gmpDate Desc")
     private List<GMP> gmp;
 
     @PrePersist
     public void initializeDefaults() {
+        // subscription
         if (subscriptions == null || subscriptions.isEmpty()) {
             subscriptions = new ArrayList<>();
             subscriptions.add(new Subscription("QIB", 0));
             subscriptions.add(new Subscription("Non-Institutional", 0));
             subscriptions.add(new Subscription("Retailer", 0));
         }
-
+        // GMP
         if (gmp == null || gmp.isEmpty()) {
             gmp = new ArrayList<>();
             gmp.add(new GMP(0, LocalDate.now(), LocalDateTime.now()));
+        }
+
+        // Verdict
+        if (verdict == null) {
+            verdict = Verdict.NOT_REVIEWED;
         }
     }
 

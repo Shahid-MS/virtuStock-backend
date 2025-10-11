@@ -85,4 +85,8 @@ public class IPOService {
         ipoRepo.save(existingIpo);
         return existingIpo;
     }
+
+    public void deleteIpo(UUID id) {
+        ipoRepo.deleteById(id);
+    }
 }

@@ -23,7 +23,6 @@ public class IPOHelper {
         ipo.setName((String) ipoMap.get("name"));
         ipo.setSymbol((String) ipoMap.get("symbol"));
         ipo.setType((String) ipoMap.get("type"));
-        ipo.setStatus((String) ipoMap.get("status"));
         ipo.setInfoUrl((String) ipoMap.get("infoUrl"));
         ipo.setNseInfoUrl((String) ipoMap.get("nseInfoUrl"));
 

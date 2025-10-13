@@ -64,7 +64,6 @@ public class IPOService {
             for (GMP g : newGMP) {
                 Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
                         .findFirst();
-                System.out.println(foundGMP);
                 if (foundGMP.isPresent()) {
                     foundGMP.get().setGmp(g.getGmp());
                     foundGMP.get().setLastUpdated(LocalDateTime.now());

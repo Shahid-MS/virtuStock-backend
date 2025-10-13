@@ -5,6 +5,5 @@ public enum Verdict {
     BUY,
     HOLD,
     AVOID,
-    UPCOMING,
     NOT_REVIEWED,
 }

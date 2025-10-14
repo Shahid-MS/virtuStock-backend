@@ -69,7 +69,8 @@ public class IPO {
 
     private String logo;
     @Column(name = "issue_size")
-    private String issueSize;
+    private IssueSize issueSize;
+    
     @Column(name = "prospectus_url")
     private String prospectusUrl;
 

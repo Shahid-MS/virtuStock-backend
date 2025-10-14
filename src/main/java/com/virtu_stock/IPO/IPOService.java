@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
@@ -20,6 +21,13 @@ public class IPOService {
 
     public List<IPO> fetchAllIpos() {
         List<IPO> ipos = ipoRepo.findAllByOrderByEndDateDesc();
+        return ipos;
+    }
+
+    public List<IPO> fetchIPOByStatus(String status) {
+        List<IPO> ipos = ipoRepo.findAll().stream()
+                .filter(ipo -> ipo.getStatus() == IPOStatus.valueOf(status.toUpperCase()))
+                .toList();
         return ipos;
     }
 

@@ -2,10 +2,12 @@ package com.virtu_stock.IPO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
@@ -23,6 +25,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,7 +48,6 @@ public class IPO {
     private String name;
     private String symbol;
     private String type;
-    private String status;
     @Column(name = "info_url")
     private String infoUrl;
     @Column(name = "nse_info_url")
@@ -67,7 +69,8 @@ public class IPO {
 
     private String logo;
     @Column(name = "issue_size")
-    private String issueSize;
+    private IssueSize issueSize;
+    
     @Column(name = "prospectus_url")
     private String prospectusUrl;
 
@@ -76,6 +79,10 @@ public class IPO {
 
     @Enumerated(EnumType.STRING)
     private Verdict verdict;
+
+    @Transient
+    @Enumerated(EnumType.STRING)
+    private IPOStatus status;
 
     @ElementCollection
     @CollectionTable(name = "ipo_strengths", joinColumns = @JoinColumn(name = "ipo_id"))
@@ -101,9 +108,9 @@ public class IPO {
         // subscription
         if (subscriptions == null || subscriptions.isEmpty()) {
             subscriptions = new ArrayList<>();
-            subscriptions.add(new Subscription("QIB", 0));
-            subscriptions.add(new Subscription("Non-Institutional", 0));
-            subscriptions.add(new Subscription("Retailer", 0));
+            subscriptions.add(new Subscription("QIB", 0.00));
+            subscriptions.add(new Subscription("Non-Institutional", 0.00));
+            subscriptions.add(new Subscription("Retailer", 0.00));
         }
         // GMP
         if (gmp == null || gmp.isEmpty()) {
@@ -115,6 +122,33 @@ public class IPO {
         if (verdict == null) {
             verdict = Verdict.NOT_REVIEWED;
         }
+
+    }
+
+    public IPOStatus getStatus() {
+        LocalDate today = LocalDate.now();
+        if (startDate == null || endDate == null) {
+            return null;
+        }
+        // After Start Date
+        if (today.isBefore(startDate)) {
+            return IPOStatus.UPCOMING;
+        }
+        // Date after End date
+        else if (today.isAfter(endDate)) {
+            return IPOStatus.CLOSED;
+        }
+        // Today before 5pm open else closed
+        if (today.isEqual(today)) {
+            LocalTime nowTime = LocalTime.now();
+            if (nowTime.isAfter(LocalTime.of(17, 0))) {
+                return IPOStatus.CLOSED;
+            } else {
+                return IPOStatus.OPEN;
+            }
+        }
+        // Between startDate and EndDate
+        return IPOStatus.OPEN;
     }
 
 }

@@ -1,7 +1,5 @@
-package com.virtu_stock.Subscription;
+package com.virtu_stock.IPO;
 
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Subscription {
-    private String name;
-    @Column(name = "subscription_value")
-    private Double subsvalue;
+public class IssueSize {
+    private String fresh;
+    private String offerForSale;
+    private String totalIssueSize;
 }

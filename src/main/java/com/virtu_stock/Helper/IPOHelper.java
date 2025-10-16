@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.virtu_stock.IPO.IPO;
+import com.virtu_stock.IPO.IssueSize;
 
 @Component
 public class IPOHelper {
@@ -23,7 +24,6 @@ public class IPOHelper {
         ipo.setName((String) ipoMap.get("name"));
         ipo.setSymbol((String) ipoMap.get("symbol"));
         ipo.setType((String) ipoMap.get("type"));
-        ipo.setStatus((String) ipoMap.get("status"));
         ipo.setInfoUrl((String) ipoMap.get("infoUrl"));
         ipo.setNseInfoUrl((String) ipoMap.get("nseInfoUrl"));
 
@@ -37,7 +37,7 @@ public class IPOHelper {
 
         ipo.setMinQty((Integer) ipoMap.get("minQty"));
         ipo.setLogo((String) ipoMap.get("logo"));
-        ipo.setIssueSize((String) ipoMap.get("issueSize"));
+        ipo.setIssueSize(new IssueSize("NA", "NA", (String) ipoMap.get("issueSize")));
         ipo.setProspectusUrl((String) ipoMap.get("prospectusUrl"));
         ipo.setAbout((String) ipoMap.get("about"));
 

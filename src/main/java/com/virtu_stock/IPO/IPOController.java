@@ -29,7 +29,7 @@ public class IPOController {
 
     @GetMapping("/{id}")
     public IPO fetchIpo(@PathVariable UUID id) {
-        return ipoService.fetchIpo(id);
+        return ipoService.getIpoById(id);
     }
 
 }

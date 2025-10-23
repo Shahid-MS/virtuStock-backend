@@ -1,7 +1,8 @@
 package com.virtu_stock.IPO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,69 +32,78 @@ public class IPOService {
         return ipos;
     }
 
-    public IPO fetchIpo(UUID id) {
+    public IPO getIpoById(UUID id) {
         return ipoRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
     }
 
-    public IPO updateIpo(UUID id, IPO ipo) {
-        IPO existingIpo = ipoRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
+    public IPO saveIpo(IPO ipo) {
+        return ipoRepo.save(ipo);
+    }
 
-        // Subscription Update
-        List<Subscription> newSubs = ipo.getSubscriptions();
-        if (newSubs != null) {
-            List<Subscription> existingSubs = existingIpo.getSubscriptions();
-            for (Subscription subs : newSubs) {
-                Optional<Subscription> foundSub = existingSubs.stream()
-                        .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))
-                        .findFirst();
-                if (foundSub.isPresent()) {
+    public void updateSubscriptions(IPO existingIpo, List<Subscription> newSubs) {
+        List<Subscription> existingSubs = existingIpo.getSubscriptions();
+        for (Subscription subs : newSubs) {
+            Optional<Subscription> foundSub = existingSubs.stream()
+                    .filter(s -> s.getName().equalsIgnoreCase(subs.getName()))
+                    .findFirst();
+            if (foundSub.isPresent()) {
+                if (foundSub.get().getSubsvalue() != subs.getSubsvalue()) {
                     foundSub.get().setSubsvalue(subs.getSubsvalue());
-                } else {
-                    existingSubs.add(
-                            Subscription.builder()
-                                    .name(subs.getName())
-                                    .subsvalue(subs.getSubsvalue())
-                                    .build());
                 }
+            } else {
+                existingSubs.add(
+                        Subscription.builder()
+                                .name(subs.getName())
+                                .subsvalue(subs.getSubsvalue())
+                                .build());
             }
-            existingIpo.setSubscriptions(existingSubs);
         }
+        existingIpo.setSubscriptions(existingSubs);
+    }
 
-        // Update GMP
-        List<GMP> newGMP = ipo.getGmp();
-        if (newGMP != null) {
-            List<GMP> existingGMP = existingIpo.getGmp();
-            if (existingGMP == null) {
-                existingGMP = new ArrayList<>();
-            }
-
-            for (GMP g : newGMP) {
-                Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
-                        .findFirst();
-                if (foundGMP.isPresent()) {
+    public void updateGmp(IPO existingIpo, List<GMP> newGmp) {
+        List<GMP> existingGMP = existingIpo.getGmp();
+        for (GMP g : newGmp) {
+            Optional<GMP> foundGMP = existingGMP.stream().filter(s -> s.getGmpDate().equals(g.getGmpDate()))
+                    .findFirst();
+            if (foundGMP.isPresent()) {
+                if (foundGMP.get().getGmp() != g.getGmp()) {
                     foundGMP.get().setGmp(g.getGmp());
                     foundGMP.get().setLastUpdated(LocalDateTime.now());
-                } else {
-                    existingGMP.add(GMP.builder().gmp(g.getGmp()).gmpDate(g.getGmpDate())
-                            .lastUpdated(LocalDateTime.now()).build());
                 }
+            } else {
+                existingGMP.add(GMP.builder().gmp(g.getGmp()).gmpDate(g.getGmpDate())
+                        .lastUpdated(LocalDateTime.now()).build());
             }
-            existingIpo.setGmp(existingGMP);
         }
+        existingIpo.setGmp(existingGMP);
+    }
 
-        // update verdict
-        Verdict newVerdict = ipo.getVerdict();
-        if (newVerdict != null) {
+    public void updateVerdict(IPO existingIpo, Verdict newVerdict) {
+        if (existingIpo.getVerdict() != newVerdict) {
             existingIpo.setVerdict(newVerdict);
         }
+    }
 
-        ipoRepo.save(existingIpo);
-        return existingIpo;
+    public void updateIssueSize(IPO existingIpo, IssueSize newIssueSize) {
+        if (existingIpo.getIssueSize().getFresh() != newIssueSize.getFresh()) {
+            existingIpo.getIssueSize().setFresh(newIssueSize.getFresh());
+        }
+        if (existingIpo.getIssueSize().getOfferForSale() != newIssueSize.getOfferForSale()) {
+            existingIpo.getIssueSize().setOfferForSale(newIssueSize.getOfferForSale());
+        }
+        if (existingIpo.getIssueSize().getTotalIssueSize() != newIssueSize.getTotalIssueSize()) {
+            existingIpo.getIssueSize().setTotalIssueSize(newIssueSize.getTotalIssueSize());
+        }
     }
 
     public void deleteIpo(UUID id) {
         ipoRepo.deleteById(id);
+    }
+
+    public List<IPO> fetchIPOByListingPending() {
+        List<IPO> ipos = ipoRepo.findByListingDateLessThanEqual(LocalDate.now());
+        return ipos;
     }
 }

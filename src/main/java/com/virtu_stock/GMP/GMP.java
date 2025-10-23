@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GMP {
 
-    private Integer gmp;
+    private double gmp;
 
     @Column(name = "gmp_date")
     private LocalDate gmpDate;

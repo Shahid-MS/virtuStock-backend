@@ -59,10 +59,10 @@ public class IPO {
     @Column(name = "listing_date")
     private LocalDate listingDate;
     @Column(name = "min_price")
-    private Integer minPrice;
+    private double minPrice;
 
     @Column(name = "max_price")
-    private Integer maxPrice;
+    private double maxPrice;
 
     @Column(name = "minimum_quantity")
     private Integer minQty;
@@ -70,7 +70,7 @@ public class IPO {
     private String logo;
     @Column(name = "issue_size")
     private IssueSize issueSize;
-    
+
     @Column(name = "prospectus_url")
     private String prospectusUrl;
 
@@ -111,6 +111,7 @@ public class IPO {
             subscriptions.add(new Subscription("QIB", 0.00));
             subscriptions.add(new Subscription("Non-Institutional", 0.00));
             subscriptions.add(new Subscription("Retailer", 0.00));
+            subscriptions.add(new Subscription("Total", 0.00));
         }
         // GMP
         if (gmp == null || gmp.isEmpty()) {
@@ -126,29 +127,49 @@ public class IPO {
     }
 
     public IPOStatus getStatus() {
+
         LocalDate today = LocalDate.now();
         if (startDate == null || endDate == null) {
             return null;
         }
-        // After Start Date
-        if (today.isBefore(startDate)) {
-            return IPOStatus.UPCOMING;
-        }
-        // Date after End date
-        else if (today.isAfter(endDate)) {
+
+        if (today.isAfter(listingDate)) {
             return IPOStatus.CLOSED;
         }
-        // Today before 5pm open else closed
-        if (today.isEqual(today)) {
+
+        if (today.isEqual(listingDate)) {
+            LocalTime nowTime = LocalTime.now();
+            if (nowTime.isAfter(LocalTime.of(10, 0))) {
+                return IPOStatus.LISTED;
+            } else {
+                return IPOStatus.LISTING_PENDING;
+            }
+        }
+
+        if (today.isAfter(endDate)) {
+            return IPOStatus.LISTING_PENDING;
+        }
+
+        if (today.isEqual(endDate)) {
             LocalTime nowTime = LocalTime.now();
             if (nowTime.isAfter(LocalTime.of(17, 0))) {
-                return IPOStatus.CLOSED;
+                return IPOStatus.LISTING_PENDING;
             } else {
                 return IPOStatus.OPEN;
             }
         }
-        // Between startDate and EndDate
-        return IPOStatus.OPEN;
+
+        if (today.isAfter(startDate)) {
+            return IPOStatus.OPEN;
+        }
+
+        if (today.isEqual(endDate)) {
+            LocalTime nowTime = LocalTime.now();
+            if (nowTime.isAfter(LocalTime.of(9, 0))) {
+                return IPOStatus.OPEN;
+            }
+        }
+        return IPOStatus.UPCOMING;
     }
 
 }

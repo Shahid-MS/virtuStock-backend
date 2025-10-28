@@ -8,5 +8,15 @@
     "name": "ipoalerts.url",
     "type": "java.lang.String",
     "description": "ipoalerts url"
+  },
+  {
+    "name": "mailboxlayer.access.key",
+    "type": "java.lang.String",
+    "description": "A description for 'mailboxlayer.access.key'"
+  },
+  {
+    "name": "mailboxlayer.url",
+    "type": "java.lang.String",
+    "description": "A description for 'mailboxlayer.url'"
   }
 ]}

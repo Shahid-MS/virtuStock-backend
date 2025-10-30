@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +18,5 @@ public class OTP {
     private String email;
     private String otp;
     private LocalDateTime createdAt;
+    private boolean isVerified = false;
 }

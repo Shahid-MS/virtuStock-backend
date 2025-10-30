@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.virtu_stock.Helper.MailHelper;
-import com.virtu_stock.Mail.MailBoxLayer.EmailVerificationService;
+// import com.virtu_stock.Mail.MailBoxLayer.EmailVerificationService;
+import com.virtu_stock.Mail.MailService;
 import com.virtu_stock.Mail.OTP.OTPService;
 import com.virtu_stock.Security.Authentication.DTO.AuthRequest;
 import com.virtu_stock.Security.JWT.JWTUtil;
@@ -43,8 +43,8 @@ public class AuthController {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final OTPService otpService;
-    private final MailHelper mailHelper;
-    private final EmailVerificationService emailVerificationService;
+    // private final EmailVerificationService emailVerificationService;
+    private final MailService mailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -88,7 +88,14 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(Map.of("errors", errors));
             }
 
+            if (!otpService.isEmailVerified(user.getEmail())) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("error", "Please verify your email before registration."));
+            }
+
             User savedUser = userService.registerUser(user);
+            otpService.deleteOtpByEmail(user.getEmail());
+            mailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFirstName());
             UserResponseDTO userResponseDTO = modelMapper.map(savedUser, UserResponseDTO.class);
             return ResponseEntity.ok(Map.of("message", "User Saved Successfully", "User", userResponseDTO));
 
@@ -120,7 +127,7 @@ public class AuthController {
                     .body(Map.of("error", "Invalid email format"));
         }
 
-        if (!mailHelper.hasMXRecord(email)) {
+        if (!mailService.hasMXRecord(email)) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Invalid email domain. Please enter a valid email address."));
         }
@@ -130,10 +137,10 @@ public class AuthController {
                     .body(Map.of("error", "User Already exists"));
         }
 
-        if (!emailVerificationService.verifyEmail(email)) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Invalid email. Please enter a valid email address."));
-        }
+        // if (!emailVerificationService.verifyEmail(email)) {
+        //     return ResponseEntity.badRequest()
+        //             .body(Map.of("error", "Invalid email. Please enter a valid email address."));
+        // }
         try {
             otpService.generateAndSendOtp(email);
             return ResponseEntity.ok(Map.of("message", "OTP sent successfully to " + email));
@@ -147,6 +154,23 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "An unexpected error occurred while sending OTP."));
         }
+    }
+
+    @PostMapping("/register/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String otp = request.get("otp");
+
+        if (email == null || otp == null)
+            return ResponseEntity.badRequest().body(Map.of("error", "Email and OTP are required"));
+
+        boolean verified = otpService.verifyOtp(email, otp);
+
+        if (verified)
+            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+        else
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid Email or expired OTP"));
     }
 
 }

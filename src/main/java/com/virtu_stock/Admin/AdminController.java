@@ -1,6 +1,5 @@
 package com.virtu_stock.Admin;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,13 +114,14 @@ public class AdminController {
 
     @PutMapping("/ipo/{id}")
     public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody JsonNode ipoNode) {
+
         try {
             IPO existingIpo = ipoService.getIpoById(id);
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
             ipoNode.fieldNames().forEachRemaining(fieldName -> {
+
                 switch (fieldName.toLowerCase()) {
                     case "subscriptions":
                         List<Subscription> newSubs = Arrays.asList(

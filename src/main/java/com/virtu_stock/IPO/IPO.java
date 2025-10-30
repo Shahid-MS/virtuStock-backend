@@ -127,7 +127,6 @@ public class IPO {
     }
 
     public IPOStatus getStatus() {
-
         LocalDate today = LocalDate.now();
         if (startDate == null || endDate == null) {
             return null;
@@ -163,7 +162,7 @@ public class IPO {
             return IPOStatus.OPEN;
         }
 
-        if (today.isEqual(endDate)) {
+        if (today.isEqual(startDate)) {
             LocalTime nowTime = LocalTime.now();
             if (nowTime.isAfter(LocalTime.of(9, 0))) {
                 return IPOStatus.OPEN;

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.xml.crypto.KeySelector.Purpose;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,19 +22,28 @@ public class OTPService {
     private final MailService mailService;
     private final Random random = new Random();
 
-    public void generateAndSendOtp(String email) {
+    public void generateAndSendOtp(String email, OTPPurpose purpose) {
         String otp = String.format("%06d", random.nextInt(999999));
-        OTP otpEntity = new OTP(email, otp, LocalDateTime.now(), false);
-        mailService.sendOTPForRegistration(email, otp);
+        otpRepository.findByEmailAndPurpose(email, purpose)
+                .ifPresent(existing -> otpRepository.delete(existing));
+        OTP otpEntity = new OTP(email, otp, LocalDateTime.now(), purpose, false);
         otpRepository.save(otpEntity);
+        switch (purpose) {
+            case SIGN_UP -> mailService.sendOTPForRegistration(email, otp);
+            case FORGOT_PASSWORD -> mailService.sendOTPForForgotPassword(email, otp);
+            default -> throw new IllegalArgumentException("Unsupported OTP purpose: " + purpose);
+        }
     }
 
-    public boolean verifyOtp(String email, String otp) {
+    public boolean verifyOtp(String email, String otp, OTPPurpose purpose) {
         Optional<OTP> optionalOtp = otpRepository.findById(email);
         if (optionalOtp.isEmpty())
             return false;
 
         OTP otpEntity = optionalOtp.get();
+
+        if (otpEntity.getPurpose() != purpose)
+            return false;
 
         if (otpEntity.isVerified())
             return true;
@@ -48,14 +59,15 @@ public class OTPService {
         return true;
     }
 
-    public boolean isEmailVerified(String email) {
-        return otpRepository.findById(email)
+    public boolean isEmailVerified(String email, OTPPurpose purpose) {
+        return otpRepository.findByEmailAndPurpose(email, purpose)
                 .map(OTP::isVerified)
                 .orElse(false);
     }
 
-    public void deleteOtpByEmail(String email) {
-        otpRepository.deleteById(email);
+    @Transactional
+    public void deleteByEmailAndPurpose(String email, OTPPurpose purpose) {
+        otpRepository.deleteByEmailAndPurpose(email, purpose);
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package com.virtu_stock.Mail;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import java.util.List;
@@ -21,6 +22,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,8 @@ public class MailService {
 
     @Value("${mail.default.cc:}")
     private String defaultCc;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void sendHtmlMail(String to, String subject, String htmlBody) {
         try {
@@ -263,9 +268,16 @@ public class MailService {
 
     @SuppressWarnings("unchecked")
     private String buildIpoTable(Map<String, Object> res, String key) {
-        List<Map<String, Object>> ipos = (List<Map<String, Object>>) res.get(key);
-        if (ipos == null || ipos.isEmpty()) {
+
+        Object rawObj = res.get(key);
+        if (!(rawObj instanceof List<?> rawList) || rawList.isEmpty()) {
             return "";
+        }
+
+        List<Map<String, Object>> ipos = new ArrayList<>();
+        for (Object obj : rawList) {
+            Map<String, Object> map = objectMapper.convertValue(obj, Map.class);
+            ipos.add(map);
         }
 
         boolean hasReason = ipos.get(0).containsKey("reason");

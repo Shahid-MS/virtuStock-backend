@@ -211,26 +211,26 @@ public class MailService {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="font-size:14px; border-collapse:collapse;">
+                                                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="font-size:14px; border-collapse:collapse; color:#1d2939 !important;">
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;"><b>Total Saved</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Saved</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;"><b>Total Exists</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Exists</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;"><b>Total Skipped</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Skipped</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;"><b>Total Errors</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Errors</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;"><b>Total Ipos</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Ipos</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                     </table>
                                                 </td>
@@ -248,20 +248,22 @@ public class MailService {
         sb.append(buildIpoTable(res, "Skipped Ipos"));
         sb.append(buildIpoTable(res, "Errors Ipos"));
 
-        sb.append("""
-                                   <tr>
-                                        <td align="center" style="padding:25px 0;">
-                                            <p style="color:#999; font-size:12px; margin:0;">
-                                                &copy; %s VirtuStock. All rights reserved.
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                                """.formatted(LocalDate.now().getYear()));
+        sb.append(
+                """
+                                                   <tr>
+                                                  <td align="center" style="padding:25px 0;">
+                                                      <p style="color:#999; font-size:12px; margin:0;">
+                                                        &copy; %s VirtuStock. All rights reserved.
+                                                      </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                            """
+                        .formatted(LocalDate.now().getYear()));
 
         sendHtmlMailWithCC(to, subject, sb.toString());
     }
@@ -286,29 +288,31 @@ public class MailService {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("""
-                     <tr>
-                        <td style="padding-top:25px;">
-                            <h3 style="color:#1d2939; font-size:18px; margin: 0;">%s</h3>
-                        </td>
-                    </tr>
-                    <tr>
-                         <td>
-                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
-                                style="margin-top:10px; font-size:14px; border-collapse:collapse;">
-                                <tr style="background:%s;">
-                                    <th align="left" style="padding:10px; color:#1a1a1a;">IPO Name</th>
-                """.formatted(key, headerColor));
+        sb.append(
+                """
+                             <tr>
+                                <td style="padding-top:25px;">
+                                    <h3 style="color:#1d2939; font-size:18px; margin: 0;">%s</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                 <td>
+                                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
+                                        style="margin-top:10px; font-size:14px; border-collapse:collapse;">
+                                        <tr style="background:%s;">
+                                            <th align="left" style="width:50%%; padding:10px; color:#1a1a1a; color:#1d2939 !important; ">IPO Name</th>
+                        """
+                        .formatted(key, headerColor));
 
         if (hasReason) {
             sb.append("""
-                    <th align="left" style="padding:10px; color:#1a1a1a;">Reason</th>
+                    <th style="background-color:#eef2f6; color:#1a1a1a; padding:10px; text-align:left;">Reason</th>
                       """);
         }
         if (hasErrorMessage) {
             sb.append("""
-                        <th align="left" style="padding:10px; color:#1a1a1a;">Error Message</th>
-                    """);
+                    <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Error Message</th>
+                     """);
         }
 
         sb.append("</tr>");
@@ -316,17 +320,17 @@ public class MailService {
         for (Map<String, Object> ipo : ipos) {
             sb.append("<tr>");
             sb.append("""
-                         <td style="padding:10px; border-bottom:1px solid #ddd;">%s</td>
+                         <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
                     """.formatted(ipo.get("name")));
 
             if (hasReason) {
                 sb.append("""
-                             <td style="padding:10px; border-bottom:1px solid #ddd;">%s</td>
+                             <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
                         """.formatted(ipo.get("reason")));
             }
             if (hasErrorMessage) {
                 sb.append("""
-                         <td style="padding:10px; border-bottom:1px solid #ddd;">%s</td>
+                         <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
                         """.formatted(ipo.get("message")));
             }
 

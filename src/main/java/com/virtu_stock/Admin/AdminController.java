@@ -34,22 +34,27 @@ import com.virtu_stock.IPO.IPORepository;
 import com.virtu_stock.IPO.IPOService;
 import com.virtu_stock.IPO.IssueSize;
 import com.virtu_stock.IPOAlerts.IPOAlertsService;
+import com.virtu_stock.Mail.MailService;
+import com.virtu_stock.Security.Util.AuthUtil;
 import com.virtu_stock.Subscription.Subscription;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
     @Autowired
-    IPORepository ipoRepo;
+    private IPORepository ipoRepo;
 
     @Autowired
-    IPOAlertsService ipoAlertsService;
+    private IPOAlertsService ipoAlertsService;
 
     @Autowired
     private IPOHelper ipoHelper;
 
     @Autowired
     private IPOService ipoService;
+
+    @Autowired
+    private MailService mailService;
 
     @SuppressWarnings("unchecked")
     @GetMapping("/ipo/fetch")
@@ -101,6 +106,8 @@ public class AdminController {
             res.put("Exists Ipos", exists);
             res.put("Skipped Ipos", skipped);
             res.put("Errors Ipos", errors);
+            String to = AuthUtil.getCurrentUserEmail();
+            mailService.sendIpoFetchSummaryEmail(to, res);
             return ResponseEntity.ok(res);
 
         } catch (Exception e) {
@@ -111,6 +118,8 @@ public class AdminController {
         }
 
     }
+
+    
 
     @PutMapping("/ipo/{id}")
     public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody JsonNode ipoNode) {
@@ -152,7 +161,7 @@ public class AdminController {
 
                 }
             });
-
+            
             IPO updatedIpo = ipoService.saveIpo(existingIpo);
             return ResponseEntity.ok(updatedIpo);
 

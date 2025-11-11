@@ -6,4 +6,6 @@ public enum IPOStatus {
     LISTED,
     CLOSED,
     UPCOMING,
+    ALLOTMENT_PENDING,
+    ALLOTMENT
 }

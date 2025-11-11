@@ -11,12 +11,12 @@ import com.virtu_stock.IPO.IssueSize;
 
 @Component
 public class IPOHelper {
+    @SuppressWarnings("unchecked")
     public IPO mapToIPO(Object ipoObj) {
         if (!(ipoObj instanceof Map<?, ?>)) {
             return null;
         }
 
-        @SuppressWarnings("unchecked")
         Map<String, Object> ipoMap = (Map<String, Object>) ipoObj;
 
         IPO ipo = new IPO();
@@ -32,8 +32,9 @@ public class IPOHelper {
         ipo.setListingDate(LocalDate.parse((String) ipoMap.get("listingDate")));
 
         String[] priceRange = ((String) ipoMap.get("priceRange")).split("-");
-        ipo.setMinPrice(Integer.parseInt(priceRange[0]));
-        ipo.setMaxPrice(Integer.parseInt(priceRange[1]));
+        ipo.setMinPrice(Double.parseDouble(priceRange[0]));
+        ipo.setMaxPrice(Double.parseDouble(priceRange[1]));
+        ipo.setListedPrice(ipo.getMaxPrice());
 
         ipo.setMinQty((Integer) ipoMap.get("minQty"));
         ipo.setLogo((String) ipoMap.get("logo"));
@@ -50,6 +51,22 @@ public class IPOHelper {
         ipo.setRisks(((List<?>) risksObj).stream()
                 .map(String::valueOf)
                 .toList());
+
+        List<Map<String, Object>> scheduleList = (List<Map<String, Object>>) ipoMap.get("schedule");
+        System.out.println(scheduleList);
+        if (scheduleList != null) {
+            for (Map<String, Object> eventMap : scheduleList) {
+                String event = (String) eventMap.get("event");
+                if ("Allotment finalization".equalsIgnoreCase(event)) {
+                    String dateStr = (String) eventMap.get("date");
+                    if (dateStr != null && !dateStr.isBlank()) {
+                        System.out.println(dateStr);
+                        ipo.setAllotmentDate(LocalDate.parse(dateStr));
+                    }
+                    break;
+                }
+            }
+        }
 
         return ipo;
     }

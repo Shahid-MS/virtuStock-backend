@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
@@ -37,6 +38,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class IPO {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -59,10 +61,13 @@ public class IPO {
     @Column(name = "listing_date")
     private LocalDate listingDate;
     @Column(name = "min_price")
-    private double minPrice;
+    private Double minPrice;
+
+    @Column(name = "listed_price")
+    private Double listedPrice;
 
     @Column(name = "max_price")
-    private double maxPrice;
+    private Double maxPrice;
 
     @Column(name = "minimum_quantity")
     private Integer minQty;
@@ -76,6 +81,9 @@ public class IPO {
 
     @Column(columnDefinition = "TEXT")
     private String about;
+
+    @Column(name = "allotment_date")
+    private LocalDate allotmentDate;
 
     @Enumerated(EnumType.STRING)
     private Verdict verdict;
@@ -145,8 +153,21 @@ public class IPO {
             }
         }
 
-        if (today.isAfter(endDate)) {
+        if (today.isAfter(allotmentDate)) {
             return IPOStatus.LISTING_PENDING;
+        }
+
+        if (today.isEqual(allotmentDate)) {
+            LocalTime nowTime = LocalTime.now();
+            if (nowTime.isAfter(LocalTime.of(17, 0))) {
+                return IPOStatus.LISTING_PENDING;
+            } else {
+                return IPOStatus.ALLOTMENT;
+            }
+        }
+
+        if (today.isAfter(endDate)) {
+            return IPOStatus.ALLOTMENT_PENDING;
         }
 
         if (today.isEqual(endDate)) {

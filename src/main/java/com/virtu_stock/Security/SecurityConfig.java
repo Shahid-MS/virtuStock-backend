@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/ipo/**").permitAll()
                          .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasRole("USER")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -148,16 +149,41 @@ public class AppliedIpoController {
         try {
             String email = principal.getName();
             User user = userService.findByEmail(email);
-
             AppliedIpo appliedIpo = appliedIpoService.findById(id);
- 
-
             if (appliedIpo.getUser() != user) {
                 throw new RuntimeException("user have not applied for this ipo: " + id);
             }
-
             AppliedIpoResponseDTO res = modelMapper.map(appliedIpo, AppliedIpoResponseDTO.class);
 
+            return ResponseEntity.ok(res);
+
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body("Please login and try again");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Something went wrong" + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/applied-ipo/{id}")
+    public ResponseEntity<?> updateById(@PathVariable UUID id, Principal principal,
+            @RequestBody Map<String, Integer> req) {
+        try {
+            String email = principal.getName();
+            User user = userService.findByEmail(email);
+            AppliedIpo appliedIpo = appliedIpoService.findById(id);
+            if (appliedIpo.getUser() != user) {
+                throw new RuntimeException("user have not applied for this ipo: " + id);
+            }
+            Integer lot = req.get("lot");
+
+            if (appliedIpo.getAppliedLot() == lot) {
+                return ResponseEntity.badRequest().body("message: " + "Same Applied Lot");
+            }
+            appliedIpo.setAppliedLot(lot);
+            appliedIpoService.save(appliedIpo);
+            AppliedIpoResponseDTO res = modelMapper.map(appliedIpo, AppliedIpoResponseDTO.class);
             return ResponseEntity.ok(res);
 
         } catch (UsernameNotFoundException e) {

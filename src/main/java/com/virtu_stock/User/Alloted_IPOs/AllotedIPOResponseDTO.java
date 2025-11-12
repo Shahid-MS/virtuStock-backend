@@ -1,5 +1,7 @@
 package com.virtu_stock.User.Alloted_IPOs;
 
+import java.time.LocalDate;
+
 import com.virtu_stock.User.Applied_IPOs.AppliedIpoResponseDTO;
 
 import lombok.Data;
@@ -10,4 +12,5 @@ public class AllotedIPOResponseDTO {
     private Integer allotedLot;
     private Double sellPrice;
     private Double taxDeducted;
+    private LocalDate appliedDate;
 }

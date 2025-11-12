@@ -1,5 +1,6 @@
 package com.virtu_stock.User.Applied_IPOs;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import com.virtu_stock.Enum.AllotmentStatus;
@@ -13,4 +14,5 @@ public class AppliedIpoResponseDTO {
     private IPOResponseDTO ipo;
     private Integer appliedLot;
     private AllotmentStatus allotment;
+    private LocalDate appliedDate;
 }

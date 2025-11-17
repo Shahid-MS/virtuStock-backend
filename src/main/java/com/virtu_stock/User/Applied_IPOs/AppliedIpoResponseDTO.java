@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.virtu_stock.Enum.AllotmentStatus;
 import com.virtu_stock.IPO.IPOResponseDTO;
+import com.virtu_stock.User.Alloted_IPOs.AllotedIPOResponseDTO;
 
 import lombok.Data;
 
@@ -15,4 +16,5 @@ public class AppliedIpoResponseDTO {
     private Integer appliedLot;
     private AllotmentStatus allotment;
     private LocalDate appliedDate;
+    private AllotedIPOResponseDTO allotedIpo;
 }

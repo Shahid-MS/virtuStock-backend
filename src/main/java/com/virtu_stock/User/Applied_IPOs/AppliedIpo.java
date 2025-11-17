@@ -4,7 +4,6 @@ import java.beans.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.virtu_stock.Enum.AllotmentStatus;
 import com.virtu_stock.IPO.IPO;
 import com.virtu_stock.User.User;
@@ -26,12 +25,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "applied_ipo")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -66,6 +67,8 @@ public class AppliedIpo {
         LocalDate allotmentDate = ipo.getAllotmentDate();
         if (LocalDate.now().isAfter(allotmentDate)) {
             return this.allotment;
+        } else if (LocalDate.now().isEqual(allotmentDate) && allotment == AllotmentStatus.ALLOTED) {
+            return AllotmentStatus.ALLOTED;
         } else if (LocalDate.now().isEqual(allotmentDate)) {
             return AllotmentStatus.ALLOTMENT;
         }

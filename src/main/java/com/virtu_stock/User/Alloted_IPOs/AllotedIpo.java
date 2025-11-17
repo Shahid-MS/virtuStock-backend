@@ -4,7 +4,8 @@ import java.beans.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.virtu_stock.User.Applied_IPOs.AppliedIpo;
 
 import jakarta.persistence.Column;
@@ -20,12 +21,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "alloted_ipo")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -57,12 +60,25 @@ public class AllotedIpo {
     }
 
     @Transient
+    @JsonProperty("netReturn")
     public Double getNetReturn() {
         if (sellPrice == null || appliedIpo == null || appliedIpo.getIpo() == null) {
             return 0.0;
         }
-        Double listedPrice = appliedIpo.getIpo().getListedPrice();
-        return (sellPrice - listedPrice) * allotedLot - (taxDeducted != null ? taxDeducted : 0.0);
+        Double maxPrice = appliedIpo.getIpo().getMaxPrice();
+        return (sellPrice - maxPrice) - (taxDeducted != null ? taxDeducted : 0.0);
+    }
+
+    @Transient
+    @JsonProperty("netReturnPercent")
+    public Double getNetReturnPercent() {
+        Double netReturn = getNetReturn();
+        if (netReturn == 0.0) {
+            return 0.0;
+        }
+        Double totalInvested = appliedIpo.getIpo().getMaxPrice();
+        Double netReturnPercent = (netReturn / totalInvested) * 100;
+        return Math.round(netReturnPercent * 100.0) / 100.0;
     }
 
 }

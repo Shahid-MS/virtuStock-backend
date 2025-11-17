@@ -59,4 +59,6 @@ public class IPOResponseDTO {
     private List<Subscription> subscriptions;
 
     private List<GMP> gmp;
+    private Double listingReturn;
+    private Double listingReturnPercent;
 }

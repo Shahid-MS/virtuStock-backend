@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
 import com.virtu_stock.GMP.GMP;
@@ -38,7 +39,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class IPO {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -88,10 +88,6 @@ public class IPO {
     @Enumerated(EnumType.STRING)
     private Verdict verdict;
 
-    @Transient
-    @Enumerated(EnumType.STRING)
-    private IPOStatus status;
-
     @ElementCollection
     @CollectionTable(name = "ipo_strengths", joinColumns = @JoinColumn(name = "ipo_id"))
     @Column(name = "strength")
@@ -134,6 +130,7 @@ public class IPO {
 
     }
 
+    @Transient
     public IPOStatus getStatus() {
         LocalDate today = LocalDate.now();
         if (startDate == null || endDate == null) {
@@ -190,6 +187,26 @@ public class IPO {
             }
         }
         return IPOStatus.UPCOMING;
+    }
+
+    @Transient
+    @JsonProperty("listingReturn")
+    public Double getListingReturn() {
+        if (listedPrice == null) {
+            return 0.0;
+        }
+        return listedPrice - maxPrice;
+    }
+
+    @Transient
+    @JsonProperty("listingReturnPercent")
+    public Double getListingReturnPercent() {
+        Double listingReturn = getListingReturn();
+        if (listingReturn == 0.0) {
+            return 0.0;
+        }
+        Double listingReturnPercent = (listingReturn / maxPrice) * 100;
+        return Math.round(listingReturnPercent * 100.0) / 100.0;
     }
 
 }

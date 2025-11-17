@@ -8,6 +8,8 @@ import com.virtu_stock.IPO.IPOResponseDTO;
 import com.virtu_stock.IPO.IPOService;
 import com.virtu_stock.User.User;
 import com.virtu_stock.User.UserService;
+import com.virtu_stock.User.Alloted_IPOs.AllotedIpo;
+import com.virtu_stock.User.Alloted_IPOs.AllotedIpoService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
@@ -38,6 +41,7 @@ public class AppliedIpoController {
     private final IPOService ipoService;
     private final AppliedIpoService appliedIpoService;
     private final ModelMapper modelMapper;
+    private final AllotedIpoService allotedIpoService;
 
     @PostMapping("/apply")
     public ResponseEntity<?> markAsApplied(@RequestBody AppliedIpoRequestDTO request, Principal principal) {
@@ -58,7 +62,8 @@ public class AppliedIpoController {
             appliedIpo.setAppliedLot(request.getAppliedLot());
             appliedIpo.setAllotment(AllotmentStatus.NOT_ALLOTED);
             appliedIpoService.save(appliedIpo);
-            return ResponseEntity.ok("IPO marked as applied");
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("Message", "Successfully created", "appliedIpoId", appliedIpo.getId()));
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body("Please Login and try again");
         } catch (RuntimeException e) {
@@ -77,9 +82,17 @@ public class AppliedIpoController {
             String email = principal.getName();
             User user = userService.findByEmail(email);
             IPO ipo = ipoService.getIpoById(UUID.fromString(ipoId));
-            boolean alreadyApplied = appliedIpoService.existsByUserAndIpo(user, ipo);
-            Map<String, Boolean> response = Map.of("applied", alreadyApplied);
-            return ResponseEntity.ok(response);
+            Optional<AppliedIpo> appliedIpo = appliedIpoService.findByUserAndIpo(user, ipo);
+            Map<String, Object> res;
+            if (appliedIpo.isPresent()) {
+                res = Map.of(
+                        "applied", true,
+                        "appliedIpoId", appliedIpo.get().getId());
+            } else {
+                res = Map.of(
+                        "applied", false);
+            }
+            return ResponseEntity.ok(res);
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body("Please Login and try again");
         } catch (RuntimeException e) {
@@ -153,6 +166,7 @@ public class AppliedIpoController {
             if (appliedIpo.getUser() != user) {
                 throw new RuntimeException("user have not applied for this ipo: " + id);
             }
+
             AppliedIpoResponseDTO res = modelMapper.map(appliedIpo, AppliedIpoResponseDTO.class);
 
             return ResponseEntity.ok(res);
@@ -168,24 +182,52 @@ public class AppliedIpoController {
 
     @PatchMapping("/applied-ipo/{id}")
     public ResponseEntity<?> updateById(@PathVariable UUID id, Principal principal,
-            @RequestBody Map<String, Integer> req) {
+            @RequestBody Map<String, Object> req) {
         try {
             String email = principal.getName();
             User user = userService.findByEmail(email);
             AppliedIpo appliedIpo = appliedIpoService.findById(id);
-            if (appliedIpo.getUser() != user) {
-                throw new RuntimeException("user have not applied for this ipo: " + id);
+            if (!appliedIpo.getUser().getId().equals(user.getId())) {
+                throw new RuntimeException("User does not own this IPO: " + id);
             }
-            Integer lot = req.get("lot");
 
-            if (appliedIpo.getAppliedLot() == lot) {
-                return ResponseEntity.badRequest().body("message: " + "Same Applied Lot");
+            for (String key : req.keySet()) {
+                switch (key) {
+                    case "lot" -> {
+                        Integer lot = (Integer) req.get("lot");
+
+                        if (lot == null || lot < 1) {
+                            return ResponseEntity.badRequest().body("Invalid lot value");
+                        }
+
+                        if (!lot.equals(appliedIpo.getAppliedLot())) {
+                            appliedIpo.setAppliedLot(lot);
+                        }
+                    }
+                    case "allotment" -> {
+                        String allotmentStr = req.get("allotment").toString();
+                        AllotmentStatus status = AllotmentStatus.valueOf(allotmentStr);
+
+                        if (appliedIpo.getAllotment() != status) {
+                            if (status == AllotmentStatus.ALLOTED) {
+                                AllotedIpo allotedIpo = allotedIpoService.create(appliedIpo.getId());
+                                appliedIpo.setAllotedIpo(allotedIpo);
+                                appliedIpo.setAllotment(status);
+                            } else if (status == AllotmentStatus.NOT_ALLOTED) {
+                                allotedIpoService.deleteAllotment(appliedIpo.getId());
+                                appliedIpo.setAllotment(status);
+                            }
+                        }
+                    }
+                    default -> {
+                        return ResponseEntity.badRequest()
+                                .body("Invalid field: " + key);
+                    }
+                }
             }
-            appliedIpo.setAppliedLot(lot);
             appliedIpoService.save(appliedIpo);
             AppliedIpoResponseDTO res = modelMapper.map(appliedIpo, AppliedIpoResponseDTO.class);
             return ResponseEntity.ok(res);
-
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body("Please login and try again");
         } catch (RuntimeException e) {

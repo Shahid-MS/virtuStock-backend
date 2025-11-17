@@ -106,4 +106,8 @@ public class IPOService {
         List<IPO> ipos = ipoRepo.findByListingDateLessThanEqual(LocalDate.now());
         return ipos;
     }
+
+    public List<Object[]> getIpoCountByMonth() {
+        return ipoRepo.countIpoByMonth();
+    }
 }

@@ -1,5 +1,6 @@
 package com.virtu_stock.User.Alloted_IPOs;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -41,6 +42,10 @@ public class AllotedIpoService {
     public AllotedIpo findById(UUID id) {
         return allotedIpoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No Alloted Ipo find with : " + id));
+    }
+
+    public List<Object[]> sumMonthlyProfit(UUID id, int year) {
+        return allotedIpoRepository.sumMonthlyProfit(id, year);
     }
 
     @Transactional

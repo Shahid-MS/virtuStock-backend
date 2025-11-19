@@ -54,11 +54,6 @@ public class AllotedIpo {
     @Column(name = "alloted_date")
     private LocalDate allotedDate;
 
-    @PrePersist
-    public void initialze() {
-        this.allotedDate = LocalDate.now();
-    }
-
     @Transient
     @JsonProperty("netReturn")
     public Double getNetReturn() {
@@ -81,4 +76,10 @@ public class AllotedIpo {
         return Math.round(netReturnPercent * 100.0) / 100.0;
     }
 
+ 
+
+    @PrePersist
+    public void initialze() {
+        this.allotedDate = LocalDate.now();
+    }
 }

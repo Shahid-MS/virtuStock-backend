@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.virtu_stock.IPO.IPOService;
 import com.virtu_stock.User.User;
 import com.virtu_stock.User.UserService;
+import com.virtu_stock.User.Alloted_IPOs.AllotedIpoService;
 import com.virtu_stock.User.Applied_IPOs.AppliedIpoService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class MonthlySummaryIPOController {
     private final UserService userService;
     private final IPOService ipoService;
     private final AppliedIpoService appliedIpoService;
+    private final AllotedIpoService allotedIpoService;
 
     @GetMapping("/monthly-summary")
     public ResponseEntity<?> monthlySummary(Principal principal, @RequestParam(required = false) Integer year) {
@@ -87,4 +89,42 @@ public class MonthlySummaryIPOController {
         return ResponseEntity.ok(res);
 
     }
+
+    @GetMapping("/monthly-summary-profit")
+    public ResponseEntity<?> monthlySummaryProfit(Principal principal, @RequestParam(required = false) Integer year) {
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+        String email = principal.getName();
+        User user = userService.findByEmail(email);
+
+        List<Object[]> monthlyProfitList = allotedIpoService.sumMonthlyProfit(user.getId(), year);
+
+        Map<Integer, Integer> monthlyProfitMap = monthlyProfitList.stream()
+                .collect(Collectors.toMap(
+                        r -> ((Number) r[0]).intValue(),
+                        r -> ((Number) r[1]).intValue()));
+        List<String> months = new ArrayList<>();
+        List<Integer> monthProfit = new ArrayList<>();
+
+        for (int month = 1; month <= 12; month++) {
+            String monthName = Month.of(month)
+                    .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+
+            months.add(monthName);
+
+            monthProfit.add(monthlyProfitMap.getOrDefault(month, 0));
+        }
+
+        Map<String, Object> yearData = new LinkedHashMap<>();
+        yearData.put("month", months);
+        yearData.put("profit", monthProfit);
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("Year-" + year, yearData);
+
+        return ResponseEntity.ok(res);
+
+    }
+
 }

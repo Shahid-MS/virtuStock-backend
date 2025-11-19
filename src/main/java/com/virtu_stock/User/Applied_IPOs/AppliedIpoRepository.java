@@ -24,8 +24,25 @@ public interface AppliedIpoRepository extends JpaRepository<AppliedIpo, UUID> {
                 SELECT MONTH(a.ipo.startDate), COUNT(a)
                 FROM AppliedIpo a
                 WHERE a.user.id = :userId
+                  AND YEAR(a.ipo.startDate) = :year
                 GROUP BY MONTH(a.ipo.startDate)
+                ORDER BY MONTH(a.ipo.startDate)
             """)
-    List<Object[]> countAppliedByUserAndMonth(@Param("userId") UUID userId);
+    List<Object[]> countAppliedByUserMonthYear(
+            @Param("userId") UUID userId,
+            @Param("year") int year);
+
+    @Query("""
+                SELECT MONTH(a.ipo.startDate), COUNT(a)
+                FROM AppliedIpo a
+                WHERE a.user.id = :userId
+                  AND a.allotment = 'ALLOTED'
+                  AND YEAR(a.ipo.startDate) = :year
+                GROUP BY MONTH(a.ipo.startDate)
+                ORDER BY MONTH(a.ipo.startDate)
+            """)
+    List<Object[]> countAllotedByUserMonthYear(
+            @Param("userId") UUID userId,
+            @Param("year") int year);
 
 }

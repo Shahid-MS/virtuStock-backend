@@ -48,7 +48,11 @@ public class AppliedIpoService {
         appliedIpoRepository.deleteByUserAndIpo(user, ipo);
     }
 
-    public List<Object[]> countAppliedByUserAndMonth(UUID id) {
-        return appliedIpoRepository.countAppliedByUserAndMonth(id);
+    public List<Object[]> countAppliedByUserAndMonthAndYear(UUID id, int year) {
+        return appliedIpoRepository.countAppliedByUserMonthYear(id, year);
+    }
+
+    public List<Object[]> countAllotedByUserMonthAndYear(UUID id, int year) {
+        return appliedIpoRepository.countAllotedByUserMonthYear(id, year);
     }
 }

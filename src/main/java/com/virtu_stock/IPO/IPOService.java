@@ -107,7 +107,7 @@ public class IPOService {
         return ipos;
     }
 
-    public List<Object[]> getIpoCountByMonth() {
-        return ipoRepo.countIpoByMonth();
+    public List<Object[]> getIpoCountByMonthAndYear(Integer year) {
+        return ipoRepo.countIpoByMonthAndYear(year);
     }
 }

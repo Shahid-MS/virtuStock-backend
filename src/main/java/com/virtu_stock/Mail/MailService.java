@@ -1,13 +1,18 @@
 package com.virtu_stock.Mail;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Hashtable;
+
+import java.util.List;
+import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.MailException;
@@ -16,6 +21,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -26,6 +33,11 @@ import lombok.RequiredArgsConstructor;
 public class MailService {
     private final JavaMailSender mailSender;
 
+    @Value("${mail.default.cc:}")
+    private String defaultCc;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public void sendHtmlMail(String to, String subject, String htmlBody) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -34,6 +46,35 @@ public class MailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             helper.addInline("logo", new ClassPathResource("static/Images/logo/logo-name.png"));
+            mailSender.send(mimeMessage);
+
+        } catch (MailSendException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid email address: " + to);
+        } catch (MailException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    "Failed to send email to " + to + ". Please try again later.");
+        } catch (MessagingException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Email formatting error.");
+        }
+    }
+
+    public void sendHtmlMailWithCC(String to, String subject, String htmlBody) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            helper.addInline("logo", new ClassPathResource("static/Images/logo/logo-name.png"));
+            if (defaultCc != null && !defaultCc.isBlank()) {
+                String[] ccList = defaultCc.split(",");
+                helper.setCc(ccList);
+            }
             mailSender.send(mimeMessage);
 
         } catch (MailSendException e) {
@@ -99,7 +140,7 @@ public class MailService {
                 </div>
                                 """
                 .formatted(name.split(" ")[0], LocalDate.now().getYear());
-        sendHtmlMail(to, subject, htmlContent);
+        sendHtmlMailWithCC(to, subject, htmlContent);
     }
 
     public void sendOTPForForgotPassword(String to, String otp) {
@@ -147,6 +188,162 @@ public class MailService {
                                                 """
                 .formatted(name.split(" ")[0], LocalDate.now().getYear());
         sendHtmlMail(to, subject, htmlContent);
+    }
+
+    public void sendIpoFetchSummaryEmail(String to, Map<String, Object> res) {
+        String subject = "📊 IPO Fetch Summary Report - VirtuStock";
+        StringBuilder sb = new StringBuilder();
+        sb.append(
+                """
+                        <div style="margin:0; padding:0; background-color:#f9fafc; font-family:Arial, sans-serif;">
+                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background-color:#f9fafc; padding:30px 0; width:100%%;">
+                                <tr>
+                                    <td align="center" style="padding :0 10px;">
+                                        <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#ffffff; border-radius:10px; padding:25px; border:1px solid #e5e7eb; max-width: 600px;">
+                                            <tr>
+                                                <td align="center" style="padding:20px;">
+                                                    <img src="cid:logo" alt="VirtuStock" width="150" style="display:block; margin-bottom:20px;">
+                                                    <h2 style="color:#1d2939; font-size:22px; margin:0 0 10px;">IPO Fetch Summary Report</h2>
+                                                    <p style="color:#555; font-size:14px; margin:0 0 20px;">
+                                                        Here’s the latest status from your IPO alert fetch operation:
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="font-size:14px; border-collapse:collapse; color:#1d2939 !important;">
+                                                        <tr>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Saved</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Exists</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Skipped</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Errors</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Ipos</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        """
+                        .formatted(
+                                res.get("Total Saved"),
+                                res.get("Total Exists"),
+                                res.get("Total Skipped"),
+                                res.get("Total Errors"),
+                                res.get("Total")));
+
+        sb.append(buildIpoTable(res, "Saved Ipos"));
+        sb.append(buildIpoTable(res, "Exists Ipos"));
+        sb.append(buildIpoTable(res, "Skipped Ipos"));
+        sb.append(buildIpoTable(res, "Errors Ipos"));
+
+        sb.append(
+                """
+                                                   <tr>
+                                                  <td align="center" style="padding:25px 0;">
+                                                      <p style="color:#999; font-size:12px; margin:0;">
+                                                        &copy; %s VirtuStock. All rights reserved.
+                                                      </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                            """
+                        .formatted(LocalDate.now().getYear()));
+
+        sendHtmlMailWithCC(to, subject, sb.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    private String buildIpoTable(Map<String, Object> res, String key) {
+
+        Object rawObj = res.get(key);
+        if (!(rawObj instanceof List<?> rawList) || rawList.isEmpty()) {
+            return "";
+        }
+
+        List<Map<String, Object>> ipos = new ArrayList<>();
+        for (Object obj : rawList) {
+            Map<String, Object> map = objectMapper.convertValue(obj, Map.class);
+            ipos.add(map);
+        }
+
+        boolean hasReason = ipos.get(0).containsKey("reason");
+        boolean hasErrorMessage = ipos.get(0).containsKey("message");
+        String headerColor = hasErrorMessage ? "#ffecec" : "#eef2f6";
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(
+                """
+                             <tr>
+                                <td style="padding-top:25px;">
+                                    <h3 style="color:#1d2939; font-size:18px; margin: 0;">%s</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                 <td>
+                                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
+                                        style="margin-top:10px; font-size:14px; border-collapse:collapse;">
+                                        <tr style="background:%s;">
+                                            <th align="left" style="width:50%%; padding:10px; color:#1a1a1a; color:#1d2939 !important; ">IPO Name</th>
+                        """
+                        .formatted(key, headerColor));
+
+        if (hasReason) {
+            sb.append("""
+                    <th style="background-color:#eef2f6; color:#1a1a1a; padding:10px; text-align:left;">Reason</th>
+                      """);
+        }
+        if (hasErrorMessage) {
+            sb.append("""
+                    <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Error Message</th>
+                     """);
+        }
+
+        sb.append("</tr>");
+
+        for (Map<String, Object> ipo : ipos) {
+            sb.append("<tr>");
+            sb.append("""
+                         <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
+                    """.formatted(ipo.get("name")));
+
+            if (hasReason) {
+                sb.append("""
+                             <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
+                        """.formatted(ipo.get("reason")));
+            }
+            if (hasErrorMessage) {
+                sb.append("""
+                         <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
+                        """.formatted(ipo.get("message")));
+            }
+
+            sb.append("</tr>");
+        }
+
+        sb.append("""
+                            </table>
+                        </td>
+                    </tr>
+                """);
+
+        return sb.toString();
     }
 
 }

@@ -5,23 +5,20 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.virtu_stock.Enum.AllotmentStatus;
 import com.virtu_stock.User.User;
 import com.virtu_stock.User.UserService;
-import com.virtu_stock.User.Applied_IPOs.AppliedIpo;
-import com.virtu_stock.User.Applied_IPOs.AppliedIpoResponseDTO;
-import com.virtu_stock.User.Applied_IPOs.AppliedIpoService;
+
+// import com.virtu_stock.User.Applied_IPOs.AppliedIpoService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("api/user")
 public class AllotedIpoController {
-    private final AppliedIpoService appliedIpoService;
+    // private final AppliedIpoService appliedIpoService;
     private final AllotedIpoService allotedIpoService;
     private final ModelMapper modelMapper;
 

@@ -4,7 +4,6 @@ import java.beans.Transient;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.virtu_stock.User.Applied_IPOs.AppliedIpo;
 
@@ -75,8 +74,6 @@ public class AllotedIpo {
         Double netReturnPercent = (netReturn / totalInvested) * 100;
         return Math.round(netReturnPercent * 100.0) / 100.0;
     }
-
- 
 
     @PrePersist
     public void initialze() {

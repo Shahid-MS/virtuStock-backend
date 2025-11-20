@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;

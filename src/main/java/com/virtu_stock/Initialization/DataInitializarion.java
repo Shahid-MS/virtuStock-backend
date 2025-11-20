@@ -47,13 +47,19 @@ public class DataInitializarion implements CommandLineRunner {
                     .build();
             userRepository.save(userAdmin);
         }
+        boolean datainit = false;
 
-        Optional<User> userOptional = userRepository.findByEmail("ms2.o.edu@gmail.com");
-        User user = userOptional.get();
-        List<Role> userRoles = user.getRoles();
-        userRoles.add(Role.ROLE_ADMIN);
-        user.setRoles(userRoles);
-        userRepository.save(user);
+        if (datainit) {
+            Optional<User> userOptional = userRepository.findByEmail("ms2.o.edu@gmail.com");
+            User user = userOptional.get();
+            List<Role> userRoles = user.getRoles();
+            userRoles.removeAll(userRoles);
+            // userRoles.add(Role.ROLE_ADMIN);
+            userRoles.add(Role.ROLE_USER);
+            userRoles.add(Role.ROLE_ADMIN);
+            user.setRoles(userRoles);
+            userRepository.save(user);
+        }
 
     }
 }

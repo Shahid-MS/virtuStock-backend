@@ -3,7 +3,7 @@ package com.virtu_stock.Enum;
 public enum Verdict {
     STRONG_BUY,
     BUY,
-    HOLD,
+    WAIT,
     AVOID,
     NOT_REVIEWED,
 }

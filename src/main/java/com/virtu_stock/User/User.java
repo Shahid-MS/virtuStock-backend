@@ -3,6 +3,7 @@ package com.virtu_stock.User;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.virtu_stock.Enum.Role;
 
 import jakarta.persistence.CollectionTable;
@@ -34,6 +35,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     @GeneratedValue

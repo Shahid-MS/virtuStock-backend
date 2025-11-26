@@ -3,7 +3,6 @@ package com.virtu_stock.User;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.virtu_stock.Enum.Role;
 
 import jakarta.persistence.CollectionTable;
@@ -35,7 +34,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class User {
     @Id
     @GeneratedValue
@@ -47,7 +46,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 4, message = "Password must be at least 4 characters long")
+    @Size(min = 6, message = "Password must be at least 6 - 20 characters long")
     @Column(nullable = false)
     private String password;
 
@@ -56,9 +55,11 @@ public class User {
 
     @Transient
     @NotBlank(message = "First name is required")
+    @Size(min = 3, max = 20, message = "First name must be 3 characters long")
     private String firstName;
 
     @Transient
+    @Size(max = 20, message = "Last name cant be greater than 20 characters long")
     private String lastName;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -66,6 +67,10 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     @Column(name = "role")
     private List<Role> roles;
+
+    public String getFullName() {
+        return (fullName != null) ? fullName.replace("|", " ") : null;
+    }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;

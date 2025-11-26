@@ -4,23 +4,30 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.virtu_stock.Mail.MailService;
 import com.virtu_stock.Security.Util.AuthUtil;
+import com.virtu_stock.User.User;
+import com.virtu_stock.User.UserRepository;
 
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
     @Autowired
     private MailService mailService;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping()
     public ResponseEntity<Map<String, Object>> fetchIPO() {
@@ -73,5 +80,17 @@ public class TestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
 
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser(@RequestParam String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Invalid email");
+        }
+        User user = userOptional.get();
+        userRepository.delete(user);
+
+        return ResponseEntity.ok("User deleted Successfully");
     }
 }

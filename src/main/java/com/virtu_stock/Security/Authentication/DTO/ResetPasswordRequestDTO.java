@@ -14,7 +14,7 @@ public class ResetPasswordRequestDTO {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 4, message = "Password must be at least 4 characters long")
+    @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
 }

@@ -27,6 +27,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of(Role.ROLE_USER));
         return userRepository.save(user);
+
     }
 
     public boolean existsByEmail(String email) {

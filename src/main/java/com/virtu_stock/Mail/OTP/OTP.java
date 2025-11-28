@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class OTP {
     @Id
     private String email;
+    
     private String otp;
     private LocalDateTime createdAt;
     @Enumerated(EnumType.STRING)

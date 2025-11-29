@@ -24,8 +24,6 @@ public class IPOHelper {
         ipo.setName((String) ipoMap.get("name"));
         ipo.setSymbol((String) ipoMap.get("symbol"));
         ipo.setType((String) ipoMap.get("type"));
-        ipo.setInfoUrl((String) ipoMap.get("infoUrl"));
-        ipo.setNseInfoUrl((String) ipoMap.get("nseInfoUrl"));
 
         ipo.setStartDate(LocalDate.parse((String) ipoMap.get("startDate")));
         ipo.setEndDate(LocalDate.parse((String) ipoMap.get("endDate")));
@@ -39,7 +37,7 @@ public class IPOHelper {
         ipo.setMinQty((Integer) ipoMap.get("minQty"));
         ipo.setLogo((String) ipoMap.get("logo"));
         ipo.setIssueSize(new IssueSize("NA", "NA", (String) ipoMap.get("issueSize")));
-        ipo.setProspectusUrl((String) ipoMap.get("prospectusUrl"));
+
         ipo.setAbout((String) ipoMap.get("about"));
 
         Object strengthsObj = ipoMap.get("strengths");

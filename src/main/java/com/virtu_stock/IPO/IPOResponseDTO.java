@@ -15,25 +15,14 @@ import lombok.Data;
 public class IPOResponseDTO {
 
     private UUID id;
-
     private String name;
     private String symbol;
     private String type;
-
-    private String infoUrl;
-
-    private String nseInfoUrl;
-
     private LocalDate startDate;
-
     private LocalDate endDate;
-
     private LocalDate listingDate;
-
     private Double minPrice;
-
     private Double listedPrice;
-
     private Double maxPrice;
 
     private Integer minQty;
@@ -41,8 +30,6 @@ public class IPOResponseDTO {
     private String logo;
 
     private IssueSize issueSize;
-
-    private String prospectusUrl;
 
     private String about;
 

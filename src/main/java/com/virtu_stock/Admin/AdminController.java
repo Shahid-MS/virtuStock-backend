@@ -119,8 +119,6 @@ public class AdminController {
 
     }
 
-    
-
     @PutMapping("/ipo/{id}")
     public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody JsonNode ipoNode) {
 
@@ -161,7 +159,7 @@ public class AdminController {
 
                 }
             });
-            
+
             IPO updatedIpo = ipoService.saveIpo(existingIpo);
             return ResponseEntity.ok(updatedIpo);
 
@@ -180,11 +178,6 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error Deleting: " + e.getMessage());
         }
-    }
-
-    @GetMapping("/ipo")
-    public List<IPO> fetchIPO() {
-        return ipoService.fetchIPOByListingPending();
     }
 
 }

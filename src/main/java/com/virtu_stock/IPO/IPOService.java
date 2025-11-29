@@ -7,38 +7,71 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
+import com.virtu_stock.Exceptions.CustomExceptions;
 import com.virtu_stock.GMP.GMP;
 import com.virtu_stock.Subscription.Subscription;
 
-@Service
-public class IPOService {
-    @Autowired
-    private IPORepository ipoRepo;
+import lombok.RequiredArgsConstructor;
 
-    public List<IPO> fetchAllIpos() {
-        List<IPO> ipos = ipoRepo.findAllByOrderByEndDateDesc();
-        return ipos;
+@Service
+@RequiredArgsConstructor
+public class IPOService {
+
+    private final IPORepository ipoRepository;
+    private final ModelMapper modelMapper;
+
+    public IPOPageResponseDTO findAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
+        if (pageNumber < 0 || pageSize <= 0) {
+            throw new CustomExceptions.InvalidPaginationParameterException(
+                    "Page number and size must be positive");
+        }
+
+        List<String> allowedSortFields = List.of("startDate", "name");
+
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new CustomExceptions.InvalidSortFieldException(
+                    "Invalid sort field. Allowed values: " + allowedSortFields);
+        }
+        Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<IPO> pageDetails = ipoRepository.findAll(pageable);
+        List<IPO> ipos = pageDetails.getContent();
+        List<IPOResponseDTO> iposDTO = ipos.stream().map(ipo -> modelMapper.map(ipo, IPOResponseDTO.class)).toList();
+        IPOPageResponseDTO ipoPageResponseDTO = new IPOPageResponseDTO();
+        ipoPageResponseDTO.setContent(iposDTO);
+        ipoPageResponseDTO.setPageNumber(pageDetails.getNumber());
+        // ipoPageResponseDTO.setPageSize(pageDetails.getSize());
+        ipoPageResponseDTO.setTotalPageElements(pageDetails.getNumberOfElements());
+        ipoPageResponseDTO.setTotalPages(pageDetails.getTotalPages());
+        ipoPageResponseDTO.setTotalElements(pageDetails.getTotalElements());
+        ipoPageResponseDTO.setLastPage(pageDetails.isLast());
+        return ipoPageResponseDTO;
     }
 
     public List<IPO> fetchIPOByStatus(String status) {
-        List<IPO> ipos = ipoRepo.findAll().stream()
+        List<IPO> ipos = ipoRepository.findAll().stream()
                 .filter(ipo -> ipo.getStatus() == IPOStatus.valueOf(status.toUpperCase()))
                 .toList();
         return ipos;
     }
 
     public IPO getIpoById(UUID id) {
-        return ipoRepo.findById(id)
+        return ipoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
     }
 
     public IPO saveIpo(IPO ipo) {
-        return ipoRepo.save(ipo);
+        return ipoRepository.save(ipo);
     }
 
     public void updateSubscriptions(IPO existingIpo, List<Subscription> newSubs) {
@@ -99,15 +132,15 @@ public class IPOService {
     }
 
     public void deleteIpo(UUID id) {
-        ipoRepo.deleteById(id);
+        ipoRepository.deleteById(id);
     }
 
     public List<IPO> fetchIPOByListingPending() {
-        List<IPO> ipos = ipoRepo.findByListingDateLessThanEqual(LocalDate.now());
+        List<IPO> ipos = ipoRepository.findByListingDateLessThanEqual(LocalDate.now());
         return ipos;
     }
 
     public List<Object[]> getIpoCountByMonthAndYear(Integer year) {
-        return ipoRepo.countIpoByMonthAndYear(year);
+        return ipoRepository.countIpoByMonthAndYear(year);
     }
 }

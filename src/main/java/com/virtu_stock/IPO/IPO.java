@@ -27,6 +27,8 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,43 +48,54 @@ public class IPO {
     @Column(name = "ipo_alert_id")
     private String ipoAlertId;
 
+    @NotBlank(message = "Name is required")
     private String name;
+
+    @NotBlank(message = "Symbol is required")
     private String symbol;
+
+    @NotBlank(message = "Type is required")
     private String type;
-    @Column(name = "info_url")
-    private String infoUrl;
-    @Column(name = "nse_info_url")
-    private String nseInfoUrl;
+
     @Column(name = "start_date")
+    @NotNull(message = "Start date is required")
     private LocalDate startDate;
+
     @Column(name = "end_date")
+    @NotNull(message = "End date is required")
     private LocalDate endDate;
+
+    @NotNull(message = "Allotment date is required")
+    @Column(name = "allotment_date")
+    private LocalDate allotmentDate;
+
     @Column(name = "listing_date")
+    @NotNull(message = "Listing date is required")
     private LocalDate listingDate;
+
+    @NotNull(message = "Minimum Price is required")
     @Column(name = "min_price")
     private Double minPrice;
+
+    @Column(name = "max_price")
+    @NotNull(message = "Maximum Price is required")
+    private Double maxPrice;
 
     @Column(name = "listed_price")
     private Double listedPrice;
 
-    @Column(name = "max_price")
-    private Double maxPrice;
-
     @Column(name = "minimum_quantity")
+    @NotNull(message = "Minimum Quantity Price is required")
     private Integer minQty;
 
+    @NotBlank(message = "logo url is required")
     private String logo;
+
     @Column(name = "issue_size")
     private IssueSize issueSize;
 
-    @Column(name = "prospectus_url")
-    private String prospectusUrl;
-
     @Column(columnDefinition = "TEXT")
     private String about;
-
-    @Column(name = "allotment_date")
-    private LocalDate allotmentDate;
 
     @Enumerated(EnumType.STRING)
     private Verdict verdict;
@@ -130,6 +143,7 @@ public class IPO {
     }
 
     @Transient
+    @JsonProperty("status")
     public IPOStatus getStatus() {
         LocalDate today = LocalDate.now();
         if (startDate == null || endDate == null) {

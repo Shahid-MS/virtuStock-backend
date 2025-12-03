@@ -123,7 +123,7 @@ public class AdminController {
     public ResponseEntity<?> updateIpo(@PathVariable UUID id, @RequestBody JsonNode ipoNode) {
 
         try {
-            IPO existingIpo = ipoService.getIpoById(id);
+            IPO existingIpo = ipoService.findById(id);
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -160,7 +160,7 @@ public class AdminController {
                 }
             });
 
-            IPO updatedIpo = ipoService.saveIpo(existingIpo);
+            IPO updatedIpo = ipoService.save(existingIpo);
             return ResponseEntity.ok(updatedIpo);
 
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class AdminController {
     @DeleteMapping("/ipo/{id}")
     public ResponseEntity<?> DeleteIpo(@PathVariable UUID id) {
         try {
-            ipoService.deleteIpo(id);
+            ipoService.deleteById(id);
             return ResponseEntity.ok().body("IPO Deleted with id: " + id);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

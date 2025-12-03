@@ -230,7 +230,7 @@ public class MailService {
                                                         </tr>
                                                         <tr>
                                                             <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Ipos</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">hdshdsshdb</td>
                                                         </tr>
                                                     </table>
                                                 </td>
@@ -310,9 +310,10 @@ public class MailService {
                       """);
         }
         if (hasErrorMessage) {
-            sb.append("""
-                    <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Error Message</th>
-                     """);
+            sb.append(
+                    """
+                            <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Error Message</th>
+                             """);
         }
 
         sb.append("</tr>");

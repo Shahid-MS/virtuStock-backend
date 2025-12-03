@@ -1,5 +1,6 @@
 package com.virtu_stock.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,6 +68,10 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     @Column(name = "role")
     private List<Role> roles;
+
+    private boolean enabled;
+    @Column(name = "created_At")
+    private LocalDateTime createdAt;
 
     public String getFullName() {
         return (fullName != null) ? fullName.replace("|", " ") : null;

@@ -1,14 +1,14 @@
-package com.virtu_stock.IPO;
+package com.virtu_stock.Pagination;
 
 import java.util.List;
 
 import lombok.Data;
 
 @Data
-public class IPOPageResponseDTO {
-    private List<IPOResponseDTO> content;
+public class PageResponseDTO<T> {
+    private List<T> content;
     private Integer pageNumber;
-    // private Integer pageSize;
+    private Integer pageSize;
     private Integer totalPageElements;
     private Integer totalPages;
     private Long totalElements;

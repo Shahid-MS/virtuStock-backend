@@ -8,17 +8,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.virtu_stock.Configurations.AppConstants;
 import com.virtu_stock.Enum.IPOStatus;
 import com.virtu_stock.Enum.Verdict;
-import com.virtu_stock.Exceptions.CustomExceptions;
+import com.virtu_stock.Exceptions.CustomExceptions.BadRequestException;
+import com.virtu_stock.Exceptions.CustomExceptions.InvalidPaginationParameterException;
+import com.virtu_stock.Exceptions.CustomExceptions.InvalidSortFieldException;
+import com.virtu_stock.Exceptions.CustomExceptions.ResourceNotFoundException;
 import com.virtu_stock.GMP.GMP;
+import com.virtu_stock.Pagination.PageResponseDTO;
 import com.virtu_stock.Subscription.Subscription;
 
 import lombok.RequiredArgsConstructor;
@@ -30,16 +34,21 @@ public class IPOService {
     private final IPORepository ipoRepository;
     private final ModelMapper modelMapper;
 
-    public IPOPageResponseDTO findAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
+    public PageResponseDTO<IPOResponseDTO> findAll(int pageNumber, int pageSize, String sortBy, String sortDir) {
         if (pageNumber < 0 || pageSize <= 0) {
-            throw new CustomExceptions.InvalidPaginationParameterException(
+            throw new InvalidPaginationParameterException(
                     "Page number and size must be positive");
+        }
+
+        if (pageSize > AppConstants.PAGE_SIZE_MAX_LIMIT) {
+            throw new InvalidPaginationParameterException(
+                    "Page size cannot exceed " + AppConstants.PAGE_SIZE_MAX_LIMIT);
         }
 
         List<String> allowedSortFields = List.of("startDate", "name");
 
         if (!allowedSortFields.contains(sortBy)) {
-            throw new CustomExceptions.InvalidSortFieldException(
+            throw new InvalidSortFieldException(
                     "Invalid sort field. Allowed values: " + allowedSortFields);
         }
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -47,10 +56,10 @@ public class IPOService {
         Page<IPO> pageDetails = ipoRepository.findAll(pageable);
         List<IPO> ipos = pageDetails.getContent();
         List<IPOResponseDTO> iposDTO = ipos.stream().map(ipo -> modelMapper.map(ipo, IPOResponseDTO.class)).toList();
-        IPOPageResponseDTO ipoPageResponseDTO = new IPOPageResponseDTO();
+        PageResponseDTO<IPOResponseDTO> ipoPageResponseDTO = new PageResponseDTO<IPOResponseDTO>();
         ipoPageResponseDTO.setContent(iposDTO);
         ipoPageResponseDTO.setPageNumber(pageDetails.getNumber());
-        // ipoPageResponseDTO.setPageSize(pageDetails.getSize());
+        ipoPageResponseDTO.setPageSize(pageDetails.getSize());
         ipoPageResponseDTO.setTotalPageElements(pageDetails.getNumberOfElements());
         ipoPageResponseDTO.setTotalPages(pageDetails.getTotalPages());
         ipoPageResponseDTO.setTotalElements(pageDetails.getTotalElements());
@@ -58,19 +67,25 @@ public class IPOService {
         return ipoPageResponseDTO;
     }
 
-    public List<IPO> fetchIPOByStatus(String status) {
-        List<IPO> ipos = ipoRepository.findAll().stream()
+    public List<IPO> findByStatus(String status) {
+        IPOStatus ipoStatus;
+        try {
+            ipoStatus = IPOStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid IPO status: " + status);
+        }
+        return ipoRepository.findAll().stream()
                 .filter(ipo -> ipo.getStatus() == IPOStatus.valueOf(status.toUpperCase()))
                 .toList();
-        return ipos;
+
     }
 
-    public IPO getIpoById(UUID id) {
+    public IPO findById(UUID id) {
         return ipoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("IPO not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("IPO", "id", id));
     }
 
-    public IPO saveIpo(IPO ipo) {
+    public IPO save(IPO ipo) {
         return ipoRepository.save(ipo);
     }
 
@@ -131,7 +146,7 @@ public class IPOService {
         }
     }
 
-    public void deleteIpo(UUID id) {
+    public void deleteById(UUID id) {
         ipoRepository.deleteById(id);
     }
 

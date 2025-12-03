@@ -21,32 +21,7 @@ public class DataInitializarion implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByEmail("ms@gmail.com").isEmpty()) {
-            User admin = User.builder()
-                    .email("ms@gmail.com")
-                    .password(passwordEncoder.encode("ms@20"))
-                    .roles(List.of(Role.ROLE_ADMIN))
-                    .build();
-            userRepository.save(admin);
-        }
 
-        if (userRepository.findByEmail("aman@gmail.com").isEmpty()) {
-            User user = User.builder()
-                    .email("aman@gmail.com")
-                    .password(passwordEncoder.encode("aman@"))
-                    .roles(List.of(Role.ROLE_USER))
-                    .build();
-            userRepository.save(user);
-        }
-
-        if (userRepository.findByEmail("saif@gmail.com").isEmpty()) {
-            User userAdmin = User.builder()
-                    .email("saif@gmail.com")
-                    .password(passwordEncoder.encode("saif@"))
-                    .roles(List.of(Role.ROLE_USER, Role.ROLE_ADMIN))
-                    .build();
-            userRepository.save(userAdmin);
-        }
         boolean datainit = false;
 
         if (datainit) {

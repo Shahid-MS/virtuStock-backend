@@ -5,23 +5,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.virtu_stock.Configurations.AppConstants;
+import com.virtu_stock.Pagination.PageResponseDTO;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/ipo")
+@RequiredArgsConstructor
 public class IPOController {
-    @Autowired
-    private IPOService ipoService;
+
+    private final IPOService ipoService;
+    private final ModelMapper modelMapper;
 
     @GetMapping
-    public IPOPageResponseDTO findAll(
+    public PageResponseDTO<IPOResponseDTO> findAll(
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int page,
             @RequestParam(defaultValue = AppConstants.PAGE_SIZE) int size,
             @RequestParam(defaultValue = "startDate") String sortBy,
@@ -31,13 +35,16 @@ public class IPOController {
     }
 
     @GetMapping(params = "status")
-    public List<IPO> fetchIPOByStatus(@RequestParam String status) {
-        return ipoService.fetchIPOByStatus(status);
+    public List<IPOResponseDTO> findByStatus(@RequestParam String status) {
+        List<IPO> ipos = ipoService.findByStatus(status);
+        List<IPOResponseDTO> iposDTO = ipos.stream().map(ipo -> modelMapper.map(ipo, IPOResponseDTO.class)).toList();
+        return iposDTO;
     }
 
     @GetMapping("/{id}")
-    public IPO fetchIpo(@PathVariable UUID id) {
-        return ipoService.getIpoById(id);
+    public IPOResponseDTO findById(@PathVariable UUID id) {
+        IPO ipo = ipoService.findById(id);
+        return modelMapper.map(ipo, IPOResponseDTO.class);
     }
 
 }

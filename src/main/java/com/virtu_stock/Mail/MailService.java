@@ -14,15 +14,17 @@ import javax.naming.directory.InitialDirContext;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.virtu_stock.Exceptions.CustomExceptions.EmailFormattingException;
+import com.virtu_stock.Exceptions.CustomExceptions.InvalidEmailAddressException;
+import com.virtu_stock.Exceptions.CustomExceptions.MailDeliveryException;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -42,24 +44,20 @@ public class MailService {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             helper.addInline("logo", new ClassPathResource("static/Images/logo/logo-name.png"));
+
             mailSender.send(mimeMessage);
 
         } catch (MailSendException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid email address: " + to);
+            throw new InvalidEmailAddressException("Invalid email: " + to);
         } catch (MailException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Failed to send email to " + to + ". Please try again later.");
+            throw new MailDeliveryException("Failed to send email to: " + to);
         } catch (MessagingException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Email formatting error.");
+            throw new EmailFormattingException("Email formatting error");
         }
     }
 
@@ -78,17 +76,11 @@ public class MailService {
             mailSender.send(mimeMessage);
 
         } catch (MailSendException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid email address: " + to);
+            throw new InvalidEmailAddressException("Invalid Email: " + to);
         } catch (MailException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Failed to send email to " + to + ". Please try again later.");
+            throw new MailDeliveryException("Failed to send email to: " + to);
         } catch (MessagingException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Email formatting error.");
+            throw new EmailFormattingException("Email formatting error");
         }
     }
 
@@ -229,8 +221,8 @@ public class MailService {
                                                             <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                         <tr>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total Ipos</b></td>
-                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">hdshdsshdb</td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;"><b>Total IPOs</b></td>
+                                                            <td style="padding:8px; border-bottom:1px solid #eee; color:#1d2939 !important;">%s</td>
                                                         </tr>
                                                     </table>
                                                 </td>
@@ -268,20 +260,93 @@ public class MailService {
         sendHtmlMailWithCC(to, subject, sb.toString());
     }
 
+    public void sendAsyncErrorMail(String to, Map<String, Object> error) {
+
+        String title = (String) error.getOrDefault("title", "Unknown Task");
+        String errorMessage = (String) error.getOrDefault("message", "Unknown error occurred");
+        String details = (String) error.getOrDefault("details", "No additional details available");
+
+        String subject = title + " Failed - VirtuStock";
+
+        String htmlBody = """
+                <div style="margin:0; padding:0; background-color:#f9fafc; font-family:Arial, sans-serif;">
+                    <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
+                           style="background-color:#f9fafc; padding:30px 0; width:100%%;">
+                        <tr>
+                            <td align="center" style="padding:0 10px;">
+                                <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
+                                       style="background:#ffffff; border-radius:10px; padding:25px;
+                                       border:1px solid #e5e7eb; max-width:600px;">
+                                    <tr>
+                                        <td align="center" style="padding:20px;">
+                                            <img src="cid:logo" alt="VirtuStock" width="150"
+                                                 style="display:block; margin-bottom:20px;">
+                                            <h2 style="color:#d92d20; font-size:22px; margin:0 0 10px;">
+                                                %s Failed
+                                            </h2>
+                                            <p style="color:#555; font-size:14px; margin:0 0 20px;">
+                                                An unexpected error occurred while executing the task.
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0"
+                                                   style="font-size:14px; border-collapse:collapse;">
+                                                <tr>
+                                                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                                                        <b>Error Message</b>
+                                                    </td>
+                                                    <td style="padding:8px; border-bottom:1px solid #eee; color:#d92d20;">
+                                                        %s
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                                                        <b>Details</b>
+                                                    </td>
+                                                    <td style="padding:8px; border-bottom:1px solid #eee;">
+                                                        %s
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td align="center" style="padding:25px 0;">
+                                            <p style="color:#999; font-size:12px; margin:0;">
+                                                &copy; %s VirtuStock. All rights reserved.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                """
+                .formatted(
+                        title,
+                        errorMessage,
+                        details,
+                        LocalDate.now().getYear());
+
+        sendHtmlMailWithCC(to, subject, htmlBody);
+    }
+
     @SuppressWarnings("unchecked")
     private String buildIpoTable(Map<String, Object> res, String key) {
-
         Object rawObj = res.get(key);
         if (!(rawObj instanceof List<?> rawList) || rawList.isEmpty()) {
             return "";
         }
-
         List<Map<String, Object>> ipos = new ArrayList<>();
         for (Object obj : rawList) {
             Map<String, Object> map = objectMapper.convertValue(obj, Map.class);
             ipos.add(map);
         }
-
         boolean hasReason = ipos.get(0).containsKey("reason");
         boolean hasErrorMessage = ipos.get(0).containsKey("message");
         String headerColor = hasErrorMessage ? "#ffecec" : "#eef2f6";

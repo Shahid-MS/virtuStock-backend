@@ -68,9 +68,9 @@ public class IPOService {
     }
 
     public List<IPO> findByStatus(String status) {
-        IPOStatus ipoStatus;
+
         try {
-            ipoStatus = IPOStatus.valueOf(status.toUpperCase());
+            IPOStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid IPO status: " + status);
         }
@@ -158,4 +158,5 @@ public class IPOService {
     public List<Object[]> getIpoCountByMonthAndYear(Integer year) {
         return ipoRepository.countIpoByMonthAndYear(year);
     }
+
 }

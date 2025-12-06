@@ -85,9 +85,7 @@ public class MonthlySummaryIPOController {
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("Year-" + year, yearData);
-
         return ResponseEntity.ok(res);
-
     }
 
     @GetMapping("/monthly-summary-profit")
@@ -122,9 +120,7 @@ public class MonthlySummaryIPOController {
 
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("Year-" + year, yearData);
-
         return ResponseEntity.ok(res);
-
     }
 
 }

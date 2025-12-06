@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.virtu_stock.Exceptions.CustomExceptions.BadRequestException;
 import com.virtu_stock.Exceptions.CustomExceptions.DuplicateResourceException;
+import com.virtu_stock.Exceptions.CustomExceptions.EmailFormattingException;
+import com.virtu_stock.Exceptions.CustomExceptions.InvalidEmailAddressException;
 import com.virtu_stock.Exceptions.CustomExceptions.InvalidPaginationParameterException;
 import com.virtu_stock.Exceptions.CustomExceptions.InvalidRequestException;
 import com.virtu_stock.Exceptions.CustomExceptions.InvalidSortFieldException;
+import com.virtu_stock.Exceptions.CustomExceptions.MailDeliveryException;
 import com.virtu_stock.Exceptions.CustomExceptions.ResourceNotFoundException;
 import com.virtu_stock.Exceptions.CustomExceptions.UnauthorizedException;
 
@@ -205,6 +208,21 @@ public class GlobalExceptionsHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(buildErrorResponse(code, userMessage, HttpStatus.CONFLICT));
+    }
+
+    @ExceptionHandler(InvalidEmailAddressException.class)
+    public ResponseEntity<?> handleInvalidEmail(InvalidEmailAddressException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler(MailDeliveryException.class)
+    public ResponseEntity<?> handleMailDelivery(MailDeliveryException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
+    }
+
+    @ExceptionHandler(EmailFormattingException.class)
+    public ResponseEntity<?> handleFormatting(EmailFormattingException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

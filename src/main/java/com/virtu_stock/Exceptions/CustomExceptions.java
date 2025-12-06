@@ -50,4 +50,22 @@ public class CustomExceptions {
         }
     }
 
+    public static class InvalidEmailAddressException extends RuntimeException {
+        public InvalidEmailAddressException(String message) {
+            super(message);
+        }
+    }
+
+    public static class MailDeliveryException extends RuntimeException {
+        public MailDeliveryException(String message) {
+            super(message);
+        }
+    }
+
+    public static class EmailFormattingException extends RuntimeException {
+        public EmailFormattingException(String message) {
+            super(message);
+        }
+    }
+
 }

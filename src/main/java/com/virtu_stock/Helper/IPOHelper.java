@@ -51,14 +51,12 @@ public class IPOHelper {
                 .toList());
 
         List<Map<String, Object>> scheduleList = (List<Map<String, Object>>) ipoMap.get("schedule");
-        System.out.println(scheduleList);
         if (scheduleList != null) {
             for (Map<String, Object> eventMap : scheduleList) {
                 String event = (String) eventMap.get("event");
                 if ("Allotment finalization".equalsIgnoreCase(event)) {
                     String dateStr = (String) eventMap.get("date");
                     if (dateStr != null && !dateStr.isBlank()) {
-                        System.out.println(dateStr);
                         ipo.setAllotmentDate(LocalDate.parse(dateStr));
                     }
                     break;

@@ -1,5 +1,7 @@
 package com.virtu_stock.DTO;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,8 +19,9 @@ public class IPOAlertsDTO {
     @AllArgsConstructor
     @Data
     public static class Saved {
-        private String id;
+        private UUID id;
         private String name;
+        private String type;
     }
 
     @AllArgsConstructor

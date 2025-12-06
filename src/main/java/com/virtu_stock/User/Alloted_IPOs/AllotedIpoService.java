@@ -17,11 +17,7 @@ public class AllotedIpoService {
     private final AllotedIpoRepository allotedIpoRepository;
     private final AppliedIpoService appliedIpoService;
 
-    public AllotedIpo create(UUID appliedIpoId) {
-        boolean alreadyAlloted = existsByAppliedIpoId(appliedIpoId);
-        if (alreadyAlloted) {
-            throw new RuntimeException("Ipo already Alloted");
-        }
+    public AllotedIpo createAllotment(UUID appliedIpoId) {
         AppliedIpo appliedIpo = appliedIpoService.findById(appliedIpoId);
         AllotedIpo allotedIpo = new AllotedIpo();
         allotedIpo.setAppliedIpo(appliedIpo);
@@ -50,10 +46,6 @@ public class AllotedIpoService {
 
     @Transactional
     public void deleteAllotment(UUID appliedIpoId) {
-        boolean alloted = existsByAppliedIpoId(appliedIpoId);
-        if (!alloted) {
-            throw new RuntimeException("Ipo Not Alloted");
-        }
         AppliedIpo appliedIpo = appliedIpoService.findById(appliedIpoId);
         appliedIpo.setAllotedIpo(null);
         allotedIpoRepository.deleteByAppliedIpo(appliedIpo);

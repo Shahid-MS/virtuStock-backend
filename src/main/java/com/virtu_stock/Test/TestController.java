@@ -45,7 +45,7 @@ public class TestController {
             res.put("Saved Ipos", List.of(
                     Map.of(
                             "id", "1783887536",
-                            "name", "Studds Accessories Limited")));
+                            "name", "Studds Accessories Limited","type","SME")));
 
             // Exists IPOs
             res.put("Exists Ipos", List.of(

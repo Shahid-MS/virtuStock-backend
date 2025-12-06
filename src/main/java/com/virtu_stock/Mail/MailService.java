@@ -349,6 +349,7 @@ public class MailService {
         }
         boolean hasReason = ipos.get(0).containsKey("reason");
         boolean hasErrorMessage = ipos.get(0).containsKey("message");
+        boolean hasType = ipos.get(0).containsKey("type");
         String headerColor = hasErrorMessage ? "#ffecec" : "#eef2f6";
 
         StringBuilder sb = new StringBuilder();
@@ -368,6 +369,11 @@ public class MailService {
                                             <th align="left" style="width:50%%; padding:10px; color:#1a1a1a; color:#1d2939 !important; ">IPO Name</th>
                         """
                         .formatted(key, headerColor));
+        if (hasType) {
+            sb.append("""
+                    <th style="background-color:#eef2f6; color:#1a1a1a; padding:10px; text-align:left;">Type</th>
+                      """);
+        }
 
         if (hasReason) {
             sb.append("""
@@ -377,9 +383,10 @@ public class MailService {
         if (hasErrorMessage) {
             sb.append(
                     """
-                            <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Error Message</th>
+                            <th  style="background-color:#ffecec; color:#1a1a1a; padding:10px; text-align:left;">Message</th>
                              """);
         }
+        
 
         sb.append("</tr>");
 
@@ -388,6 +395,12 @@ public class MailService {
             sb.append("""
                          <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
                     """.formatted(ipo.get("name")));
+
+            if (hasType) {
+                sb.append("""
+                         <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
+                        """.formatted(ipo.get("type")));
+            }        
 
             if (hasReason) {
                 sb.append("""
@@ -399,6 +412,7 @@ public class MailService {
                          <td style="padding:10px; border-bottom:1px solid #ddd; color:#1d2939 !important;">%s</td>
                         """.formatted(ipo.get("message")));
             }
+            
 
             sb.append("</tr>");
         }

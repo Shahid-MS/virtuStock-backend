@@ -67,8 +67,8 @@ public class AsyncService {
                     try {
 
                         IPO ipo = ipoHelper.mapToIPO(ipoRes);
-                        ipoRepository.save(ipo);
-                        saved.add(new IPOAlertsDTO.Saved(ipoId, ipoName));
+                        IPO savedIpo =ipoRepository.save(ipo);
+                        saved.add(new IPOAlertsDTO.Saved(savedIpo.getId(), savedIpo.getName(), savedIpo.getType()));
                     } catch (Exception e) {
                         errors.add(new IPOAlertsDTO.Error(ipoId, ipoName, e.getMessage()));
                     }
